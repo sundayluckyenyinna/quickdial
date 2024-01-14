@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8" xmlns:th="http://www.thymeleaf.org" lang="en" ?>
+<ussd>
+    <quickdial>
+        <messages>
+
+            <!-- Message to notify customer of charges -->
+            <message id="charge">
+                <line>   Dear customer, a charge of N5.00 will be applied for this service. </line>
+                <line option="1"> Continue </line>
+                <line option="2"> Cancel </line>
+            </message>
+
+            <!-- Message to display menus -->
+            <message id="menus">
+                <line option="1"> Open Account </line>
+                <line option="2"> Account Balance </line>
+                <line option="3"> Self Service </line>
+                <line option="4"> Target Savings </line>
+                <line option="5"> Loan </line>
+            </message>
+
+            <!-- Message for type of open account -->
+            <message id="accounts">
+                <line option="1"> Open account with BVN </line>
+                <line option="2"> Open account without BVN </line>
+            </message>
+
+            <message id="accounts-next">
+                <line option="3"> Open account with BVN On cloud </line>
+                <line option="4"> Open account without BVN on Prem </line>
+            </message>
+
+            <message id="accounts-msg">
+                <line> Congrats </line>
+            </message>
+        </messages>
+    </quickdial>
+</ussd>
