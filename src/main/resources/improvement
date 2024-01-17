@@ -1,0 +1,12 @@
+1. Provide option and annotation action for session termination.
+2. Provide the ability for custom termination message.
+3. Add try again message in case of wrong option input. Make the message configurable. Also make it optional.
+4. Build webpage for mobile test simulation.
+5. Create endpoints to get user statistics by sessionId and mobileNumber.
+6. Expose life cycle events and hooks.
+
+
+
+// IMPROVEMENTS
+
+When session ends internally and the developer has not terminated for the vendor(i.e

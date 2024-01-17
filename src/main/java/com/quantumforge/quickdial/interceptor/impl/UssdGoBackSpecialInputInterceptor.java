@@ -28,7 +28,7 @@ public class UssdGoBackSpecialInputInterceptor implements UssdSpecialInputInterc
         UssdUserExecutionContextInterceptionResult interceptionResult = new UssdUserExecutionContextInterceptionResult();
         UssdUserExecutionContext previousUserExecutionContext;
         if(supportsGoBackOperation(incomingExecutionContext.getInput(), incomingExecutionContext)){
-            previousUserExecutionContext = ussdSession.getExecutionContext().getPreviousElement();
+            previousUserExecutionContext = ussdSession.getExecutionContextChain().getPreviousElement();
             if(Objects.isNull(previousUserExecutionContext)){
                 throw new EmptyUssdUserSessionExecutionContextNavigableStackException(ussdSession.getSessionId());
             }

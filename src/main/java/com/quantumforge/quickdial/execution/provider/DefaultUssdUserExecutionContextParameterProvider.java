@@ -78,7 +78,7 @@ public class DefaultUssdUserExecutionContextParameterProvider implements UssdUse
             return finalExecutableContext;
         }
 
-        UssdUserExecutionContext currentContext = session.getExecutionContext().getCurrentElement();
+        UssdUserExecutionContext currentContext = session.getExecutionContextChain().getCurrentElement();
         if(isSpecialInput(payload.getInput())){
             fullCode = currentContext.getUssdCode();
         }else {

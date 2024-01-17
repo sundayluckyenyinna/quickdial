@@ -5,7 +5,8 @@
 
             <!-- Message to notify customer of charges -->
             <message id="charge">
-                <line>   Dear customer, a charge of N5.00 will be applied for this service. </line>
+                <line> Dear customer, a charge of N5.00 will be applied for this service. </line>
+                <line/>
                 <line option="1"> Continue </line>
                 <line option="2"> Cancel </line>
             </message>

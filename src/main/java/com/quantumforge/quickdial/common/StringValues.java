@@ -6,7 +6,6 @@ public interface StringValues {
     String EMPTY_STRING = "";
     String UNDERSCORE = "_";
     String DOT = ".";
-    String COMMA = ",";
     String NEW_LINE = "\n";
     String SINGLE_SPACE = " ";
     String DOT_SPACE = ". ";
@@ -20,4 +19,6 @@ public interface StringValues {
     String DOUBLE__OPENING_BLOCK = "[[ ";
     String DOUBLE_CLOSING_BLOCK = " ]]";
     String THYMELEAF_VALUE_MATCHER_PATTERN = "\\$\\{([^}]+)}";
+    String REDIRECT_REFERENCE_TOKEN = "::";
+    String FORWARD_SLASH = "/";
 }

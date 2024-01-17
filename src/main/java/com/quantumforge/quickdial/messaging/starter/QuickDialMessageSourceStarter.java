@@ -1,5 +1,6 @@
 package com.quantumforge.quickdial.messaging.starter;
 
+import com.quantumforge.quickdial.annotation.InjectDocument;
 import com.quantumforge.quickdial.bank.global.ApplicationItem;
 import com.quantumforge.quickdial.bank.global.ApplicationStore;
 import com.quantumforge.quickdial.common.StringValues;
@@ -7,7 +8,6 @@ import com.quantumforge.quickdial.exception.InvalidUssdMessageSourceException;
 import com.quantumforge.quickdial.exception.UnsupportedUssdMessageDocumentSourceException;
 import com.quantumforge.quickdial.messaging.builder.DocumentType;
 import com.quantumforge.quickdial.messaging.builder.MessageSourceDocumentBuilder;
-import com.quantumforge.quickdial.messaging.config.QuickDialMessageSourceConfigDefaultProperties;
 import com.quantumforge.quickdial.messaging.config.QuickDialMessageSourceConfigurationProperties;
 import com.quantumforge.quickdial.messaging.template.NestedFileSeparator;
 import com.quantumforge.quickdial.messaging.template.engine.DefaultUssdMessageDocumentResolver;
@@ -16,21 +16,25 @@ import com.quantumforge.quickdial.messaging.template.strut.FileResource;
 import com.quantumforge.quickdial.messaging.template.strut.MessageDocument;
 import com.quantumforge.quickdial.messaging.template.strut.MessageDocuments;
 import com.quantumforge.quickdial.util.FileUtils;
+import com.quantumforge.quickdial.util.GeneralUtils;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
+import org.springframework.core.type.filter.AnnotationTypeFilter;
+import org.springframework.stereotype.Component;
 
 import java.io.File;
-import java.util.Arrays;
+import java.lang.reflect.Field;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Map;
+import java.util.Objects;
 
 @Slf4j
 @Configuration
@@ -46,8 +50,9 @@ public class QuickDialMessageSourceStarter{
 
     @Bean
     public String messageSourceInitMemory(){
-        initMessageSourceOnStartup();
         sProperties = properties;
+        initMessageSourceOnStartup();
+        validateMessageDocumentInjection();
         return StringValues.BEAN_CREATION_SUCCESS;
     }
 
@@ -116,6 +121,35 @@ public class QuickDialMessageSourceStarter{
         }
     }
 
+    private void validateMessageDocumentInjection(){
+        if (applicationContext != null) {
+            ClassPathScanningCandidateComponentProvider scanner = new ClassPathScanningCandidateComponentProvider(false);
+            scanner.addIncludeFilter(new AnnotationTypeFilter(Component.class));
+            Map<String, Object> allBeans = applicationContext.getBeansOfType(Object.class);
+            allBeans.forEach((beanName, beanInstance) -> {
+                String string = applicationContext.getAutowireCapableBeanFactory().getBean(beanName).getClass().getName();
+                if(string.contains(GeneralUtils.SPRING_ENHANCED_CLASS_PREFIX)) {
+                    string = GeneralUtils.cleanClassNameFromSpringEnhancerSuffix(string);
+                }
+                try {
+                    Class<?> clazz = Class.forName(string);
+                    Field[] fields = clazz.getDeclaredFields();
+                    for (Field field : fields){
+                        InjectDocument injectDocument = field.getAnnotation(InjectDocument.class);
+                        if(Objects.nonNull(injectDocument)){
+                            String value = injectDocument.value();
+                            Object bean = applicationContext.getBean(value);  // This will invoke Spring error
+                        }
+                    }
+                } catch (ClassNotFoundException ignored) {
+                }
+            });
+        } else {
+            throw new IllegalStateException("ApplicationContext is not configurable.");
+        }
+    }
+
+    @SneakyThrows
     private static void verboseMessageDocumentStarterLog(MessageDocuments messageDocuments){
         log.info("================================================= USSD MESSAGE DOCUMENTS =================================================");
         messageDocuments.getMessageDocuments().forEach(messageDocument -> {

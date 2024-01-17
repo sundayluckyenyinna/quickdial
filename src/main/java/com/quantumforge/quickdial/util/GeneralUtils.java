@@ -7,6 +7,7 @@ import java.util.regex.Pattern;
 
 public class GeneralUtils {
 
+    public static final String SPRING_ENHANCED_CLASS_PREFIX = "$$EnhancerBySpringCGLIB$$";
     public final static int MESSAGE_PADDING = 3;
 
     public static <T> T returnValueOrDefaultWith(T value, T defaultValue){
@@ -42,5 +43,18 @@ public class GeneralUtils {
         if(condition){
             operation.execute();
         }
+    }
+
+
+    public static String cleanClassNameFromSpringEnhancerSuffix(String string){
+        return string.substring(0, string.indexOf(SPRING_ENHANCED_CLASS_PREFIX));
+    }
+
+    public static boolean isNullOrEmpty(Object value){
+        return Objects.isNull(value) || String.valueOf(value).trim().isEmpty();
+    }
+
+    public static String getPluralisedRetry(int times){
+        return times > 1 ? "retries" : "retry";
     }
 }

@@ -1,6 +1,7 @@
 package com.quantumforge.quickdial.bank.transit.impl;
 
 import com.quantumforge.quickdial.bank.transit.UssdMappingRegistry;
+import com.quantumforge.quickdial.bank.transit.factory.DirectUssdMapTypeContextContextProvider;
 import com.quantumforge.quickdial.bank.transit.factory.UssdMappingContextProviderFactory;
 import com.quantumforge.quickdial.bank.transit.factory.UssdMappingContextRegistrationFactory;
 import com.quantumforge.quickdial.bootstrap.CommonUssdConfigProperties;
@@ -11,14 +12,15 @@ import com.quantumforge.quickdial.exception.NoUssdMappingFoundException;
 import com.quantumforge.quickdial.util.QuickDialUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.boot.context.event.ApplicationContextInitializedEvent;
 import org.springframework.boot.context.event.ApplicationStartedEvent;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.event.EventListener;
 
 import java.util.*;
-import java.util.stream.Collectors;
+import java.util.concurrent.atomic.AtomicReference;
+
+import static com.quantumforge.quickdial.util.GeneralUtils.cleanClassNameFromSpringEnhancerSuffix;
 
 @Slf4j
 @Configuration
@@ -28,6 +30,7 @@ public class SimpleUssdMappingRegistry implements UssdMappingRegistry {
 
     private final QuickDialUtil quickDialUtil;
     private final CommonUssdConfigProperties ussdConfigProperties;
+    private final DirectUssdMapTypeContextContextProvider ussdMappingContextProvider;
     private final UssdMappingContextProviderFactory mappingContextProviderFactory;
     private final UssdMappingContextRegistrationFactory mappingContextRegistrationFactory;
 
@@ -51,17 +54,13 @@ public class SimpleUssdMappingRegistry implements UssdMappingRegistry {
 
     @Override
     public void registerUssdMapping(UssdExecutionContext ussdExecutionContext){
+        ensureUniqueMappingConstraints(ussdExecutionContext);
         mappingContextRegistrationFactory.registerExecutableMapping(ussdExecutionContext, USSD_EXECUTION_CONTEXTS);
-        validateUniqueMappingConstraints(ussdExecutionContext.getUssdMapping());
     }
 
     @Override
     public GroupUssdExecutableContextWrapper getExecutableByGroupId(String groupId){
         return getGroupExecutableByGroupId(groupId);
-    }
-
-    public List<UssdExecutable> getRegisteredExecutables(){
-        return USSD_EXECUTION_CONTEXTS;
     }
 
     public static GroupUssdExecutableContextWrapper getGroupExecutableByGroupId(String groupId){
@@ -105,27 +104,43 @@ public class SimpleUssdMappingRegistry implements UssdMappingRegistry {
                 .orElse(null);
     }
 
-    public List<UssdExecutable> getAllWithSimilarMapping(String mapping){
-        return USSD_EXECUTION_CONTEXTS.stream()
-                .filter(ussdExecutable -> {
-            String ussdMapping;
-            if(ussdExecutable.supportExecutableType(UssdExecutableType.SOLE_EXECUTABLE)){
-                ussdMapping = ((SoleUssdExecutionContextWrapper)ussdExecutable).getUssdExecutionContext().getUssdMapping();
-            }else{
-                ussdMapping = ((GroupUssdExecutableContextWrapper)ussdExecutable).getCommonUssdMapping();
-            }
-            boolean compare = quickDialUtil.getTokensBetweenDelimiters(ussdMapping).size() == quickDialUtil.getTokensBetweenDelimiters(mapping).size();
-            return ussdMapping.equalsIgnoreCase(mapping) || compare;
-        }).collect(Collectors.toList());
+    private List<UssdExecutionContext> getAllFlatExecutionContexts(){
+        List<UssdExecutionContext> result = new ArrayList<>();
+        USSD_EXECUTION_CONTEXTS
+                .forEach(ussdExecutable -> {
+                    if (ussdExecutable.supportExecutableType(UssdExecutableType.SOLE_EXECUTABLE)){
+                        UssdExecutionContext context = ((SoleUssdExecutionContextWrapper)ussdExecutable).getUssdExecutionContext();
+                        result.add(context);
+                    }
+                    else if(ussdExecutable.supportExecutableType(UssdExecutableType.GROUP_EXECUTABLE)){
+                        List<UssdExecutionContext> list = ((GroupUssdExecutableContextWrapper)ussdExecutable).getUssdExecutionContexts();
+                        result.addAll(list);
+                    }
+                });
+        return result;
     }
 
-    private void validateUniqueMappingConstraints(String mapping){
-        List<UssdExecutable> executables = getAllWithSimilarMapping(mapping);
-        if(executables.size() > 1){
-            boolean oneIsSingle = executables.stream().anyMatch(ussdExecutable -> ussdExecutable.supportExecutableType(UssdExecutableType.SOLE_EXECUTABLE));
-            boolean oneThanOneGroupHasSameMapping = executables.stream().filter(ussdExecutable -> ussdExecutable.supportExecutableType(UssdExecutableType.GROUP_EXECUTABLE)).count() > 1;
-            if(oneIsSingle || oneThanOneGroupHasSameMapping){
-                throw new AmbiguousUssdMappingException(String.format("Ambiguous ussd mapping for code: %s", mapping));
+    private void ensureUniqueMappingConstraints(UssdExecutionContext incomingContext){
+        List<UssdExecutionContext> executionContexts = getAllFlatExecutionContexts();
+        AtomicReference<UssdExecutionContext> atomicReference = new AtomicReference<>();
+        boolean alreadyRegistered = executionContexts.stream()
+                .anyMatch(ussdExecutionContext -> {
+                    boolean isSole = ussdExecutionContext.getParentExecutionType() == UssdExecutableType.SOLE_EXECUTABLE;
+                    boolean compare = quickDialUtil.getTokensBetweenDelimiters(incomingContext.getUssdMapping()).size()
+                                        == quickDialUtil.getTokensBetweenDelimiters(ussdExecutionContext.getUssdMapping()).size();
+                    atomicReference.set(ussdExecutionContext);
+                    return isSole && compare;
+                });
+        if(alreadyRegistered){
+            UssdExecutionContext matchingContext = atomicReference.get();
+            boolean isOneOfThemParameterized = quickDialUtil.isParamMapping(incomingContext.getUssdMapping()) || quickDialUtil.isParamMapping(matchingContext.getUssdMapping());
+            boolean isExactlySame = incomingContext.getUssdMapping().equalsIgnoreCase(matchingContext.getUssdMapping());
+            if(isOneOfThemParameterized || isExactlySame) {
+                String inClass = cleanClassNameFromSpringEnhancerSuffix(incomingContext.getCallableClass().getName());
+                String inMethod = incomingContext.getInvocableMethod().getName();
+                String matClass = cleanClassNameFromSpringEnhancerSuffix(matchingContext.getCallableClass().getName());
+                String matMethod = matchingContext.getInvocableMethod().getName();
+                throw new AmbiguousUssdMappingException(String.format("Ambiguous mapping for ussd mapping %s defined on method '%s' in class '%s'. A similar mapping of %s was found on method '%s' in class '%s'", incomingContext.getUssdMapping(), inMethod, inClass, matchingContext.getUssdMapping(), matMethod, matClass));
             }
         }
     }
@@ -166,8 +181,9 @@ public class SimpleUssdMappingRegistry implements UssdMappingRegistry {
     private void logUssdExecutionContext(UssdExecutionContext executionContext){
         log.info("Ussd Mapping: {}", executionContext.getUssdMapping());
         log.info("Invocation Method: {}", executionContext.getInvocableMethod().getName());
-        log.info("Declaring class: {}", executionContext.getCallableClass().getSimpleName().substring(0, executionContext.getCallableClass().getSimpleName().indexOf("$$EnhancerBy")));
-        log.info("Spring Enhanced class: {}", executionContext.getCallableClass().getSimpleName());
+        log.info("RedirectID: {}", executionContext.getContextId());
+        log.info("Declaring class: {}", cleanClassNameFromSpringEnhancerSuffix(executionContext.getCallableClass().getName()));
+        log.info("Spring Enhanced class: {}", executionContext.getCallableClass().getName());
         log.info("Parent execution type: {}", executionContext.getParentExecutionType());
     }
 }

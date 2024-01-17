@@ -2,6 +2,7 @@ package com.quantumforge.quickdial.messaging.template.strut;
 
 import com.quantumforge.quickdial.common.StringValues;
 import lombok.Getter;
+import lombok.ToString;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
@@ -11,6 +12,7 @@ import static com.quantumforge.quickdial.messaging.config.QuickDialMessageSource
 import static com.quantumforge.quickdial.messaging.config.QuickDialMessageSourceConfigDefaultProperties.XML_MESSAGE_OPTION;
 
 @Getter
+@ToString
 public class Message {
 
     private String id;

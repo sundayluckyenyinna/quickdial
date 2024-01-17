@@ -1,6 +1,8 @@
 package com.quantumforge.quickdial.context;
 
 import com.quantumforge.quickdial.annotation.UssdGroupMapping;
+import com.quantumforge.quickdial.annotation.UssdMenuHandler;
+import com.quantumforge.quickdial.annotation.UssdSubMenuHandler;
 import com.quantumforge.quickdial.common.StringValues;
 import com.quantumforge.quickdial.util.QuickDialUtil;
 import lombok.*;
@@ -15,7 +17,6 @@ import java.util.Objects;
 @Getter
 @Setter
 @Builder
-@ToString
 @NoArgsConstructor
 @AllArgsConstructor
 public class UssdExecutionContext {
@@ -26,8 +27,11 @@ public class UssdExecutionContext {
     private String callableClassName;
     private String classBeanName;
     private boolean isPossessLock = false;
+    private UssdMenuHandler menuHandler;
+    private UssdSubMenuHandler ussdSubMenuHandler;
     private UssdGroupMapping groupMapping;
     private UssdExecutableType parentExecutionType;
+    private String contextId;
 
     public boolean sameAs(UssdExecutionContext ussdExecutionContext){
         if(ussdExecutionContext.getParentExecutionType() == this.getParentExecutionType()){

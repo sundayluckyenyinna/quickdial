@@ -5,6 +5,7 @@ import com.quantumforge.quickdial.context.GroupUssdExecutableContextWrapper;
 import com.quantumforge.quickdial.context.UssdExecutable;
 import com.quantumforge.quickdial.context.UssdExecutableType;
 import com.quantumforge.quickdial.context.UssdExecutionContext;
+import com.quantumforge.quickdial.exception.AmbiguousUssdMappingException;
 import com.quantumforge.quickdial.exception.IllegalGroupUssdMappingRegistrationException;
 import com.quantumforge.quickdial.util.GeneralUtils;
 import lombok.RequiredArgsConstructor;
@@ -36,10 +37,9 @@ public class GroupUssdMappingContextRegistrar implements UssdMappingContextRegis
         }
         String groupId = ussdExecutionContext.getGroupMapping().id();
 
-        // TODO: Verify its completeness
         GroupUssdExecutableContextWrapper existingContextWrapperByCommonMapping = SimpleUssdMappingRegistry.getExecutableByCommonUssdMapping(ussdExecutionContext.getUssdMapping());
         if( Objects.nonNull(existingContextWrapperByCommonMapping) && !existingContextWrapperByCommonMapping.getGroupId().equalsIgnoreCase(groupId)){
-            throw new IllegalArgumentException("Ussd Mapping in different group must have different group mapping");
+            throw new AmbiguousUssdMappingException("Ussd Mapping in different group must have different group mapping");
         }
 
         GroupUssdExecutableContextWrapper contextWrapper = SimpleUssdMappingRegistry.getExecutableByGroupId(groupId, executables, true);

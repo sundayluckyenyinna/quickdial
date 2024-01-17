@@ -35,7 +35,7 @@ public class UssdGoForwardSpecialInputInterceptor implements UssdSpecialInputInt
 
         // Check if the current sole or group supports forward navigation
         if(supportsGoForwardNavigation(incomingExecutionContext.getInput(), incomingExecutionContext)){
-            BackwardNavigableList<UssdUserExecutionContext> navigableList = ussdSession.getExecutionContext();
+            BackwardNavigableList<UssdUserExecutionContext> navigableList = ussdSession.getExecutionContextChain();
 
             // There is a next context at the front of the current context and the current context is a sole context
             if(navigableList.hasNext() && navigableList.getCurrentElement().isSole()){
@@ -63,7 +63,7 @@ public class UssdGoForwardSpecialInputInterceptor implements UssdSpecialInputInt
                 interceptionResult.setResultingContext(ussdUserExecutionContext);
                 return interceptionResult;
             }
-            nextUserExecutionContext = ussdSession.getExecutionContext().getNextElement(); // This is actually the last element
+            nextUserExecutionContext = ussdSession.getExecutionContextChain().getNextElement(); // This is actually the last element
             if(Objects.isNull(nextUserExecutionContext)){                                 // The navigable list is actually empty
                 throw new EmptyUssdUserSessionExecutionContextNavigableStackException(ussdSession.getSessionId());
             }
@@ -71,7 +71,7 @@ public class UssdGoForwardSpecialInputInterceptor implements UssdSpecialInputInt
         }
         else{
             // Check if the current context is a group and that it is relaxing the forward option.
-            UssdUserExecutionContext currentContext = ussdSession.getExecutionContext().getCurrentElement();
+            UssdUserExecutionContext currentContext = ussdSession.getExecutionContextChain().getCurrentElement();
             if(Objects.nonNull(currentContext) &&
                     Objects.nonNull(currentContext.getExecutionContext().getGroupMapping()) &&
                     currentContext.getExecutionContext().getGroupMapping().relaxForwardNavigation()){

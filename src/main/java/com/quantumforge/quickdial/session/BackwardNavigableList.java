@@ -114,6 +114,15 @@ public class BackwardNavigableList<E> extends ArrayList<E> {
         return super.set(index, element);
     }
 
+    public boolean focus(E element){
+        int index = this.indexOf(element);
+        if(index != -1){
+            setCurrentNavigationIndexAtIndex(index);
+            return true;
+        }
+        return false;
+    }
+
     public void moveCurrentIndexForward(){
         currentNavigationIndex++;
     }

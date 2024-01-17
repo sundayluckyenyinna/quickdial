@@ -4,15 +4,11 @@ import com.quantumforge.quickdial.bank.transit.UssdUserSessionRegistry;
 import com.quantumforge.quickdial.context.UssdUserExecutionContext;
 import com.quantumforge.quickdial.execution.QuickDialUssdExecutor;
 import com.quantumforge.quickdial.payload.QuickDialPayload;
-import com.quantumforge.quickdial.session.BackwardNavigableList;
-import com.quantumforge.quickdial.session.UssdSession;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RestController
@@ -34,6 +30,6 @@ public class TestController {
 
     @GetMapping("/test-ussd/{sessionId}")
     public ResponseEntity<List<String>> displayCustomerUssdSession(@PathVariable String sessionId){
-        return ResponseEntity.ok(registry.getSession(sessionId).getExecutionContext().stream().map(UssdUserExecutionContext::getUssdCode).collect(Collectors.toList()));
+        return ResponseEntity.ok(registry.getSession(sessionId).getExecutionContextChain().stream().map(UssdUserExecutionContext::getUssdCode).collect(Collectors.toList()));
     }
 }

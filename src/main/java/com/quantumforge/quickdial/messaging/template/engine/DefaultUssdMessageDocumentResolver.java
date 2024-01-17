@@ -90,7 +90,7 @@ public final class DefaultUssdMessageDocumentResolver implements UssdMessageDocu
         OptionLineWriter optionLineWriter = OptionLineWriter.start();
         cleanedMessage.getLines().forEach(messageLine -> optionLineWriter.addLine(messageLine.getOption(), messageLine.getText(), separator));
         String rawMsgText = optionLineWriter.join();
-        GeneralUtils.doIf(Objects.nonNull(ussdModel) && Objects.nonNull(ussdModel.getOwnSession()), () -> ussdModel.getOwnSession().setLatestMessage(cleanedMessage));
+        GeneralUtils.doIf(Objects.nonNull(ussdModel) && Objects.nonNull(ussdModel.getOwnSession()), () -> ussdModel.getOwnSession().getExecutionContextChain().getCurrentElement().setResultingMessage(cleanedMessage));
         return processRawMsgWithTemplateModel(rawMsgText, ussdModel.getModelMap());
     }
 

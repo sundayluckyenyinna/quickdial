@@ -10,8 +10,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Configuration;
 
-import java.util.Objects;
-
 @Slf4j
 @Configuration
 @RequiredArgsConstructor
@@ -34,10 +32,10 @@ public class GroupUssdContextDataProvider implements UssdContextDataProvider{
      */
     @Override
     public String provide(String input, UssdExecutionContext incomingContext, UssdSession session) {
-        UssdUserExecutionContext currentUserContext = session.getExecutionContext().getCurrentElement();
+        UssdUserExecutionContext currentUserContext = session.getExecutionContextChain().getCurrentElement();
         if(input.trim().equalsIgnoreCase(ussdConfigProperties.getGoForwardOption())){
-            if(session.getExecutionContext().hasNext()){
-                return session.getExecutionContext().getNextElement().getContextData();
+            if(session.getExecutionContextChain().hasNext()){
+                return session.getExecutionContextChain().getNextElement().getContextData();
             }else{
                 return currentUserContext.getContextData();
             }

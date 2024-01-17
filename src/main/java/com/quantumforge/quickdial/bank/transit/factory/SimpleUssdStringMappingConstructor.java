@@ -39,6 +39,10 @@ public class SimpleUssdStringMappingConstructor implements UssdStringMappingCons
         String stringMapping = String.join(ussdUtilProperties.getStartDelimiter(), tokens);
         String chainedMapping = GeneralUtils.replaceConsecutiveTokens(stringMapping, ussdUtilProperties.getStartDelimiter());
         String mapping = ussdUtilProperties.getStartDelimiter().concat(chainedMapping).concat(ussdUtilProperties.getEndDelimiter());
-        return mapping.replace(StringValues.BACKWARD_SLASH, StringValues.EMPTY_STRING);
+        String cleanedMapping = mapping.replace(StringValues.BACKWARD_SLASH, StringValues.EMPTY_STRING);
+        cleanedMapping = GeneralUtils.replaceConsecutiveTokens(cleanedMapping, ussdUtilProperties.getStartDelimiter());
+        cleanedMapping = GeneralUtils.replaceConsecutiveTokens(cleanedMapping, ussdUtilProperties.getEndDelimiter());
+        cleanedMapping = GeneralUtils.replaceConsecutiveTokens(cleanedMapping, ussdUtilProperties.getShortCodePrefix());
+        return cleanedMapping;
     }
 }

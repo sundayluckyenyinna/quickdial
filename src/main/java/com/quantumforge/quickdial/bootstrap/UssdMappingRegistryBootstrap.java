@@ -7,12 +7,15 @@ import com.quantumforge.quickdial.bank.transit.UssdMappingRegistry;
 import com.quantumforge.quickdial.bank.transit.factory.UssdStringMappingConstructor;
 import com.quantumforge.quickdial.context.UssdExecutableType;
 import com.quantumforge.quickdial.context.UssdExecutionContext;
+import com.quantumforge.quickdial.execution.result.ClassToMethodReferenceResolverUtils;
+import com.quantumforge.quickdial.messaging.template.engine.UssdMessageDocumentResolver;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Collections;
@@ -28,6 +31,8 @@ public class UssdMappingRegistryBootstrap {
     private final ApplicationContext applicationContext;
     private final UssdMappingRegistry ussdMappingRegistry;
     private final UssdStringMappingConstructor stringMappingConstructor;
+    private final ClassToMethodReferenceResolverUtils referenceResolverUtils;
+
 
     @Bean
     public void initUssdMappingRegistration(){
@@ -56,7 +61,10 @@ public class UssdMappingRegistryBootstrap {
                         .groupMapping(method.getAnnotation(UssdGroupMapping.class))
                         .parentExecutionType(method.isAnnotationPresent(UssdGroupMapping.class) ? UssdExecutableType.GROUP_EXECUTABLE : UssdExecutableType.SOLE_EXECUTABLE)
                         .isPossessLock(false)
+                        .menuHandler(menuHandler)
+                        .ussdSubMenuHandler(subMenuHandler)
                         .build();
+                executionContext.setContextId(referenceResolverUtils.resolveUssdContextId(executionContext));
                 ussdMappingRegistry.registerUssdMapping(executionContext);
             });
         }
