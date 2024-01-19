@@ -43,6 +43,6 @@ public class SimpleUssdStringMappingConstructor implements UssdStringMappingCons
         cleanedMapping = GeneralUtils.replaceConsecutiveTokens(cleanedMapping, ussdUtilProperties.getStartDelimiter());
         cleanedMapping = GeneralUtils.replaceConsecutiveTokens(cleanedMapping, ussdUtilProperties.getEndDelimiter());
         cleanedMapping = GeneralUtils.replaceConsecutiveTokens(cleanedMapping, ussdUtilProperties.getShortCodePrefix());
-        return cleanedMapping;
+        return cleanedMapping.replaceAll(StringValues.SINGLE_SPACE, StringValues.EMPTY_STRING);
     }
 }

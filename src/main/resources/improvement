@@ -9,4 +9,6 @@
 
 // IMPROVEMENTS
 
-When session ends internally and the developer has not terminated for the vendor(i.e
+Give developer flexible room to provide a bean that maps the file resource documents.
+Ensure that developer do not use special characters as file separators (simple validation)
+Give developer room to add custom 'Special input interceptor' (Provide a default for 'Quit option' in every message)

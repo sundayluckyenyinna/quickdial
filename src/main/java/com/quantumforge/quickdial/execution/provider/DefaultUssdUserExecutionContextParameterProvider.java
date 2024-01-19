@@ -4,6 +4,8 @@ import com.quantumforge.quickdial.bank.transit.UssdMappingRegistry;
 import com.quantumforge.quickdial.bootstrap.CommonUssdConfigProperties;
 import com.quantumforge.quickdial.context.UssdExecutionContext;
 import com.quantumforge.quickdial.context.UssdUserExecutionContext;
+import com.quantumforge.quickdial.event.SessionInitData;
+import com.quantumforge.quickdial.event.UssdEventPublisher;
 import com.quantumforge.quickdial.interceptor.*;
 import com.quantumforge.quickdial.payload.QuickDialPayload;
 import com.quantumforge.quickdial.session.UssdSession;
@@ -29,7 +31,7 @@ public class DefaultUssdUserExecutionContextParameterProvider implements UssdUse
     @Override
     public UssdUserExecutionParameter provideParameter(QuickDialPayload payload) {
         UssdUserExecutionContext finalExecutableContext;
-        UssdSession session = registrationInterceptor.registerSession(payload.getSessionId());
+        UssdSession session = registrationInterceptor.registerOrRetrieveSession(payload.getSessionId());
         if(payload.isSessionStarting()){
             finalExecutableContext = getUssdUserExecutionContextForStartSession(payload);
         } else {
@@ -50,7 +52,6 @@ public class DefaultUssdUserExecutionContextParameterProvider implements UssdUse
     private UssdUserExecutionContext getUssdUserExecutionContextForStartSession(QuickDialPayload payload){
         String fullCode, contextData;
         UssdUserExecutionContext finalExecutableContext;
-        UssdSession session = registrationInterceptor.registerSession(payload.getSessionId());
 
         fullCode = buildFullUssdCodeByInvocationType(payload.getOriginatingCode(), ussdConfigProperties.getBaseUssdCode(), payload.getInvocationType());
         contextData = buildContextDataForStartSession(getContextDataBuildParameter(payload, null));
@@ -61,6 +62,9 @@ public class DefaultUssdUserExecutionContextParameterProvider implements UssdUse
         incomingContext.setContextData(contextData);
         buildUserUssdExecutionContext(payload, fullCode, context, incomingContext);
 
+        SessionInitData sessionInitData = buildSessionInitData(payload, contextData);
+        UssdSession session = registrationInterceptor.registerOrRetrieveSession(payload.getSessionId());
+        UssdEventPublisher.publishSessionInitEvent(session, sessionInitData);
         finalExecutableContext = incomingContext;
         session.updateUserUssdNavigationContext(finalExecutableContext);
         return finalExecutableContext;
@@ -69,7 +73,7 @@ public class DefaultUssdUserExecutionContextParameterProvider implements UssdUse
     private UssdUserExecutionContext getUssdUserExecutionContextForContinuedSession(QuickDialPayload payload){
         String fullCode;
         UssdUserExecutionContext finalExecutableContext = null;
-        UssdSession session = registrationInterceptor.registerSession(payload.getSessionId());
+        UssdSession session = registrationInterceptor.registerOrRetrieveSession(payload.getSessionId());
 
         // Intercept and check for the validity of the input
         UssdUserExecutionContextInterceptionResult inputValidationInterception = inputInterceptorExecution.checkValidInputInterception(payload.getInput(), session);
@@ -92,7 +96,7 @@ public class DefaultUssdUserExecutionContextParameterProvider implements UssdUse
         incomingContext.setInput(payload.getInput());
         buildUserUssdExecutionContext(payload, fullCode, newContext, incomingContext);
 
-        UssdUserExecutionContextInterceptionResult interceptionResult = inputInterceptorExecution.checkSpecialInterception(incomingContext, session);
+        UssdUserExecutionContextInterceptionResult interceptionResult = inputInterceptorExecution.checkSpecialInputInterception(incomingContext, session);
         if(interceptionResult.isIntercepted()){
             finalExecutableContext = interceptionResult.getResultingContext();
         }
@@ -101,7 +105,20 @@ public class DefaultUssdUserExecutionContextParameterProvider implements UssdUse
             finalExecutableContext = incomingContext;
             session.updateUserUssdNavigationContext(finalExecutableContext);
         }
+
+        SessionInitData sessionInitData = buildSessionInitData(payload, finalExecutableContext.getContextData());
+        UssdEventPublisher.publishSessionUpdatedEvent(session, sessionInitData);
         return finalExecutableContext;
+    }
+
+    private static SessionInitData buildSessionInitData(QuickDialPayload payload, String contextData){
+        return SessionInitData.builder()
+                .input(payload.getInput())
+                .ussdCode(payload.getOriginatingCode())
+                .telco(payload.getTelco())
+                .msisdn(payload.getMsisdn())
+                .contextData(contextData)
+                .build();
     }
 
     private void buildUserUssdExecutionContext(QuickDialPayload payload, String fullCode, UssdExecutionContext newContext, UssdUserExecutionContext incomingContext) {

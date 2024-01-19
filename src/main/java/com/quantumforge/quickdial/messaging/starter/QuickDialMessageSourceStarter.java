@@ -4,8 +4,9 @@ import com.quantumforge.quickdial.annotation.InjectDocument;
 import com.quantumforge.quickdial.bank.global.ApplicationItem;
 import com.quantumforge.quickdial.bank.global.ApplicationStore;
 import com.quantumforge.quickdial.common.StringValues;
-import com.quantumforge.quickdial.exception.InvalidUssdMessageSourceException;
+import com.quantumforge.quickdial.event.UssdEventPublisher;
 import com.quantumforge.quickdial.exception.UnsupportedUssdMessageDocumentSourceException;
+import com.quantumforge.quickdial.messaging.bean.QuickDialMessageResource;
 import com.quantumforge.quickdial.messaging.builder.DocumentType;
 import com.quantumforge.quickdial.messaging.builder.MessageSourceDocumentBuilder;
 import com.quantumforge.quickdial.messaging.config.QuickDialMessageSourceConfigurationProperties;
@@ -20,13 +21,13 @@ import com.quantumforge.quickdial.util.GeneralUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.context.event.ApplicationStartedEvent;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.core.io.Resource;
+import org.springframework.context.event.EventListener;
 import org.springframework.core.type.filter.AnnotationTypeFilter;
 import org.springframework.stereotype.Component;
 
@@ -43,6 +44,7 @@ import java.util.Objects;
 public class QuickDialMessageSourceStarter{
 
     private final ApplicationStore applicationStore;
+    private final QuickDialMessageResource quickDialMessageResource;
     private final ConfigurableApplicationContext applicationContext;
     private final List<MessageSourceDocumentBuilder> documentRegistries;
     private final QuickDialMessageSourceConfigurationProperties properties;
@@ -56,23 +58,18 @@ public class QuickDialMessageSourceStarter{
         return StringValues.BEAN_CREATION_SUCCESS;
     }
 
+
     private void initMessageSourceOnStartup(){
         try {
-            Resource resource = new ClassPathResource(properties.getTemplatePath());
-            File file = resource.getFile();
-            if(!file.exists()){
-                log.error("Could not find default nor any configured folder for quickdial ussd messages!");
+            if(!GeneralUtils.isNullOrEmpty(quickDialMessageResource) && !GeneralUtils.isNullOrEmpty(quickDialMessageResource.getPrimaryResourceFolder())) {
+                File file = quickDialMessageResource.getPrimaryResourceFolder();
+                saveMessageDocumentsToMemory(FileUtils.getFileResourcesInBaseFolder(file, resolveNestedFileSeparator(properties.getNestedFileSeparator())));
             }
-            else if (!file.isDirectory()){
-                String message = "The default or configured quickdial message source path must be a folder and not a file!";
-                log.error(message);
-                throw new InvalidUssdMessageSourceException(message);
-            }
-            saveMessageDocumentsToMemory(FileUtils.getFileResourcesInBaseFolder(file, resolveNestedFileSeparator(properties.getNestedFileSeparator())));
         }catch (Exception exception){
             exception.printStackTrace();
         }
     }
+
 
     private void saveMessageDocumentsToMemory(List<FileResource> fileResources) {
         MessageDocuments messageDocuments = new MessageDocuments();
@@ -139,6 +136,9 @@ public class QuickDialMessageSourceStarter{
                         if(Objects.nonNull(injectDocument)){
                             String value = injectDocument.value();
                             Object bean = applicationContext.getBean(value);  // This will invoke Spring error
+                            if(properties.isEnableVerboseTemplateLogging()) {
+                                log.info("Injected message source document with qualified name: '{}' on field: '{}' in bean class: '{}'", value, field.getName(), string);
+                            }
                         }
                     }
                 } catch (ClassNotFoundException ignored) {
@@ -151,6 +151,7 @@ public class QuickDialMessageSourceStarter{
 
     @SneakyThrows
     private static void verboseMessageDocumentStarterLog(MessageDocuments messageDocuments){
+        System.out.println();
         log.info("================================================= USSD MESSAGE DOCUMENTS =================================================");
         messageDocuments.getMessageDocuments().forEach(messageDocument -> {
             boolean isLastMessage = messageDocuments.getMessageDocuments().indexOf(messageDocument) == messageDocuments.getMessageDocuments().size() - 1;
@@ -165,5 +166,12 @@ public class QuickDialMessageSourceStarter{
             }
         });
         log.info("==========================================================================================================================");
+        System.out.println();
+    }
+
+    @EventListener(value = ApplicationStartedEvent.class)
+    public void publishMessageDocumentsInitializedEvent(){
+        MessageDocuments messageDocuments = (MessageDocuments) applicationStore.getItem(ApplicationItem.MESSAGE_DOCUMENTS.name());
+        UssdEventPublisher.publishMessageDocumentInitializedEvent(messageDocuments);
     }
 }

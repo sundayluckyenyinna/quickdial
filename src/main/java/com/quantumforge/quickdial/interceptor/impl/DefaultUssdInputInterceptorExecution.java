@@ -22,7 +22,7 @@ public class DefaultUssdInputInterceptorExecution implements UssdInputIntercepto
     private final List<UssdSpecialInputInterceptor> specialInputInterceptors;
 
     @Override
-    public UssdUserExecutionContextInterceptionResult checkSpecialInterception(UssdUserExecutionContext incomingContext, UssdSession session){
+    public UssdUserExecutionContextInterceptionResult checkSpecialInputInterception(UssdUserExecutionContext incomingContext, UssdSession session){
         return specialInputInterceptors.stream()
                 .sorted(Comparator.comparingInt(UssdSpecialInputInterceptor::order))
                 .map(interceptor -> interceptor.intercept(incomingContext, session))

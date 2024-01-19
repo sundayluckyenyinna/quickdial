@@ -1,17 +1,19 @@
 package com.quantumforge.quickdial.bank.transit.impl;
 
+import com.quantumforge.quickdial.bank.global.ApplicationStore;
 import com.quantumforge.quickdial.bank.transit.UssdMappingRegistry;
-import com.quantumforge.quickdial.bank.transit.factory.DirectUssdMapTypeContextContextProvider;
 import com.quantumforge.quickdial.bank.transit.factory.UssdMappingContextProviderFactory;
 import com.quantumforge.quickdial.bank.transit.factory.UssdMappingContextRegistrationFactory;
 import com.quantumforge.quickdial.bootstrap.CommonUssdConfigProperties;
 import com.quantumforge.quickdial.context.*;
+import com.quantumforge.quickdial.event.UssdEventPublisher;
 import com.quantumforge.quickdial.exception.AmbiguousUssdMappingException;
 import com.quantumforge.quickdial.exception.InvalidRuntimeGroupIdException;
 import com.quantumforge.quickdial.exception.NoUssdMappingFoundException;
 import com.quantumforge.quickdial.util.QuickDialUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.context.event.ApplicationContextInitializedEvent;
 import org.springframework.boot.context.event.ApplicationStartedEvent;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
@@ -28,9 +30,9 @@ import static com.quantumforge.quickdial.util.GeneralUtils.cleanClassNameFromSpr
 @EnableConfigurationProperties(CommonUssdConfigProperties.class)
 public class SimpleUssdMappingRegistry implements UssdMappingRegistry {
 
+    private final ApplicationStore applicationStore;
     private final QuickDialUtil quickDialUtil;
     private final CommonUssdConfigProperties ussdConfigProperties;
-    private final DirectUssdMapTypeContextContextProvider ussdMappingContextProvider;
     private final UssdMappingContextProviderFactory mappingContextProviderFactory;
     private final UssdMappingContextRegistrationFactory mappingContextRegistrationFactory;
 
@@ -146,9 +148,9 @@ public class SimpleUssdMappingRegistry implements UssdMappingRegistry {
     }
 
     @EventListener(value = ApplicationStartedEvent.class)
-    public void logRegisteredUssdExecutionContext(){
+    public void logRegisteredUssdExecutionContextAndPublishEvent(){
         if(ussdConfigProperties.isEnableVerboseMappingLogs()) {
-            log.info("");
+            System.out.println();
             log.info("============================================= USSD EXECUTION CONTEXT MAPPINGS =============================================");
             USSD_EXECUTION_CONTEXTS.stream().sorted(Comparator.comparingInt(UssdExecutable::mappingLength)).forEach(ussdExecutable -> {
                 boolean isLastMessage = USSD_EXECUTION_CONTEXTS.indexOf(ussdExecutable) == USSD_EXECUTION_CONTEXTS.size() - 1;
@@ -174,8 +176,9 @@ public class SimpleUssdMappingRegistry implements UssdMappingRegistry {
                 }
             });
             log.info("==========================================================================================================================");
-            log.info("");
+            System.out.println();
         }
+        UssdEventPublisher.publishUssdMappingExecutionContextInitializedEvent(USSD_EXECUTION_CONTEXTS);
     }
 
     private void logUssdExecutionContext(UssdExecutionContext executionContext){

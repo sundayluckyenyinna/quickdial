@@ -9,6 +9,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 
@@ -35,6 +36,8 @@ public class UssdSession {
     private SessionData sessionData = new SessionData(this);
 
     private UssdModel ussdModel = new UssdModel(this);
+    private LocalDateTime createdAt;
+    private boolean isFresh;
 
     public UssdUserExecutionContext getLatestUssdUserExecutionContextInGroup(String groupId){
         return executionContextChain.stream()
