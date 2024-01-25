@@ -7,8 +7,11 @@
             <message id="charge">
                 <line> Dear customer, a charge of N5.00 will be applied for this service. </line>
                 <line/>
+                <!-- This is a comment -->
                 <line option="1"> Continue </line>
                 <line option="2"> Cancel </line>
+                <line option="3"> [[${firstObject}]] </line>
+                <line option="4"> [[${secondObject}]] </line>
             </message>
 
             <!-- Message to display menus -->

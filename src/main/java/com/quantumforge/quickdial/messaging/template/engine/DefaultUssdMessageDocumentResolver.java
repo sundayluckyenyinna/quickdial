@@ -1,10 +1,12 @@
 package com.quantumforge.quickdial.messaging.template.engine;
 
 import com.quantumforge.quickdial.bank.transit.impl.SimpleUssdUserSessionRegistry;
-import com.quantumforge.quickdial.common.StringValues;
+import com.quantumforge.quickdial.exception.TemplateParsingException;
 import com.quantumforge.quickdial.exception.UssdMessageNotFoundException;
+import com.quantumforge.quickdial.interceptor.UssdInputValidationInterceptor;
 import com.quantumforge.quickdial.messaging.starter.QuickDialMessageSourceStarter;
 import com.quantumforge.quickdial.messaging.template.instrumentation.OptionLineWriter;
+import com.quantumforge.quickdial.messaging.template.resolvers.TemplateResolverRouter;
 import com.quantumforge.quickdial.messaging.template.strut.Message;
 import com.quantumforge.quickdial.messaging.template.strut.MessageDocument;
 import com.quantumforge.quickdial.session.UssdModel;
@@ -17,36 +19,36 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.parser.Parser;
-import org.jsoup.select.Elements;
-import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
-import org.thymeleaf.templatemode.TemplateMode;
-import org.thymeleaf.templateresolver.StringTemplateResolver;
 
 import java.util.Map;
 import java.util.Objects;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import static com.quantumforge.quickdial.messaging.config.QuickDialMessageSourceConfigDefaultProperties.XML_LINE_TAG;
 
 @Slf4j
 @Getter
 public final class DefaultUssdMessageDocumentResolver implements UssdMessageDocumentResolver{
 
     private final MessageDocument messageDocument;
+    private TemplateResolverRouter templateResolverRouter;
     private UssdModel ussdModel;
-    private final TemplateEngine templateEngine = new TemplateEngine();
+    private String preferredEngine;
 
     private DefaultUssdMessageDocumentResolver(){
         this.messageDocument = null;
     }
+
     public DefaultUssdMessageDocumentResolver(MessageDocument messageDocument){
         this.messageDocument = messageDocument;
         this.ussdModel = new UssdModel(null);
-        StringTemplateResolver resolver = new StringTemplateResolver();
-        resolver.setTemplateMode(TemplateMode.XML);
-        templateEngine.setTemplateResolver(resolver);
+        this.templateResolverRouter = null;
+        this.preferredEngine = null;
+    }
+
+    public DefaultUssdMessageDocumentResolver(MessageDocumentResolverBuildItem buildItem){
+        this.messageDocument = buildItem.getMessageDocument();
+        this.ussdModel = new UssdModel(null);
+        this.templateResolverRouter = buildItem.getTemplateResolverRouter();
+        this.preferredEngine = buildItem.getPreferredEngine();
     }
 
     @Override
@@ -77,6 +79,7 @@ public final class DefaultUssdMessageDocumentResolver implements UssdMessageDocu
     @Override
     public String getResolvedMessageById(String messageId, String separator){
         assert this.messageDocument != null;
+        GeneralUtils.doIf(Objects.nonNull(ussdModel) && Objects.isNull(ussdModel.getObject(UssdInputValidationInterceptor.TEMPLATE_ERROR_KEY)), () -> ussdModel.addObject(UssdInputValidationInterceptor.TEMPLATE_ERROR_KEY, false));
         Message message = this.messageDocument.getMessages().stream()
                 .filter(msg -> msg.getId().equalsIgnoreCase(messageId))
                 .findFirst()
@@ -95,30 +98,13 @@ public final class DefaultUssdMessageDocumentResolver implements UssdMessageDocu
     }
 
     private String processRawMsgWithTemplateModel(String rawMessage, Map<String, Object> model){
-        String preparedRawMessage = prepareMessageForTemplateParsing(rawMessage);
         Context context = new Context();
         model.forEach(context::setVariable);
-        return this.getTemplateEngine().process(preparedRawMessage, context);
-    }
-
-    private static String prepareTextPlaceholdersForTemplateProcessing(String input) {
-        Pattern pattern = Pattern.compile(StringValues.THYMELEAF_VALUE_MATCHER_PATTERN);
-        Matcher matcher = pattern.matcher(input);
-
-        StringBuilder result = new StringBuilder();
-        while (matcher.find()) {
-            String placeholder = matcher.group(0);
-            String replacement = StringValues.DOUBLE__OPENING_BLOCK + placeholder + StringValues.DOUBLE_CLOSING_BLOCK;
-            matcher.appendReplacement(result, Matcher.quoteReplacement(replacement));
+        try{
+            return this.templateResolverRouter.resolveTemplateByEngine(rawMessage, model, preferredEngine);
+        }catch (Exception exception){
+            log.info("Exception occurred during template parsing. Exception message is: {}", exception.getMessage());
+            throw new TemplateParsingException(exception.getMessage());
         }
-        matcher.appendTail(result);
-        return result.toString();
-    }
-
-    private static String prepareMessageForTemplateParsing(String rawMessage){
-        Document document = Jsoup.parse(rawMessage, Parser.xmlParser());
-        Elements lineElements = document.getElementsByTag(XML_LINE_TAG);
-        lineElements.forEach(element -> element.text(prepareTextPlaceholdersForTemplateProcessing(element.text())));
-        return document.html();
     }
 }

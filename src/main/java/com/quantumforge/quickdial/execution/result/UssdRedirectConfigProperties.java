@@ -10,5 +10,5 @@ public class UssdRedirectConfigProperties {
     private String referenceFormat = "default_reference";
     private boolean enableAutomaticErrorRedirectionMessage = true;
     private String inputValidationErrorRedirectReference = StringValues.EMPTY_STRING;
-    private String defaultInputValidationMessage = "Invalid input. Please select correct option. ${errorRetryAttemptLeft} ${errorRetrySuffix} left.";
+    private String defaultInputValidationMessage = "Invalid input. Please select correct option. [[${errorRetryAttemptLeft}]] [[${errorRetrySuffix}]] left.";
 }

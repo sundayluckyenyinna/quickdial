@@ -38,10 +38,12 @@ public class TestMapping {
 
     @UssdSubMenuHandler
     public String showStartPageOfCharges(UssdModel model){
+        model.addObject("firstObject", "First");
+        model.addObject("secondObject", "Secod");
         return documentResolver.withModel(model).getResolvedMessageById("charge");
     }
 
-    @UssdSubMenuHandler(submenu = "1")
+    @UssdSubMenuHandler(submenu = "*{chargeOption}")
     public UssdExecution<String> showMenus(@UssdParam("chargeOption") String chargeOption, UssdModel model, SessionData sessionData){
         if(chargeOption.equalsIgnoreCase("1")){
             sessionData.keepAttribute("here", chargeOption);
@@ -77,5 +79,4 @@ public class TestMapping {
         System.out.println(event.getSource());
         System.out.println("Session destroyed successfully...");
     }
-
 }

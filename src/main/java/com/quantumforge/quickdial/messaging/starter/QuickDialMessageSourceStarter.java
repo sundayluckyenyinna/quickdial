@@ -10,9 +10,12 @@ import com.quantumforge.quickdial.messaging.bean.QuickDialMessageResource;
 import com.quantumforge.quickdial.messaging.builder.DocumentType;
 import com.quantumforge.quickdial.messaging.builder.MessageSourceDocumentBuilder;
 import com.quantumforge.quickdial.messaging.config.QuickDialMessageSourceConfigurationProperties;
+import com.quantumforge.quickdial.messaging.config.QuickDialMessageTemplateEngineConfig;
 import com.quantumforge.quickdial.messaging.template.NestedFileSeparator;
 import com.quantumforge.quickdial.messaging.template.engine.DefaultUssdMessageDocumentResolver;
+import com.quantumforge.quickdial.messaging.template.engine.MessageDocumentResolverBuildItem;
 import com.quantumforge.quickdial.messaging.template.engine.UssdMessageDocumentResolver;
+import com.quantumforge.quickdial.messaging.template.resolvers.TemplateResolverRouter;
 import com.quantumforge.quickdial.messaging.template.strut.FileResource;
 import com.quantumforge.quickdial.messaging.template.strut.MessageDocument;
 import com.quantumforge.quickdial.messaging.template.strut.MessageDocuments;
@@ -40,14 +43,17 @@ import java.util.Objects;
 @Slf4j
 @Configuration
 @RequiredArgsConstructor
-@EnableConfigurationProperties(value = QuickDialMessageSourceConfigurationProperties.class)
+@EnableConfigurationProperties(value = { QuickDialMessageSourceConfigurationProperties.class, QuickDialMessageTemplateEngineConfig.class } )
 public class QuickDialMessageSourceStarter{
 
     private final ApplicationStore applicationStore;
+    private final TemplateResolverRouter templateResolverRouter;
     private final QuickDialMessageResource quickDialMessageResource;
     private final ConfigurableApplicationContext applicationContext;
     private final List<MessageSourceDocumentBuilder> documentRegistries;
     private final QuickDialMessageSourceConfigurationProperties properties;
+    private final QuickDialMessageTemplateEngineConfig templateEngineConfig;
+
     public static QuickDialMessageSourceConfigurationProperties sProperties;
 
     @Bean
@@ -89,7 +95,12 @@ public class QuickDialMessageSourceStarter{
     private void registerMessageDocumentToConfigurableApplicationContext(MessageDocuments messageDocuments){
         messageDocuments.getMessageDocuments().forEach(messageDocument -> {
             String beanName = messageDocument.getQualifiedName();
-            UssdMessageDocumentResolver documentResolver = new DefaultUssdMessageDocumentResolver(messageDocument);
+            MessageDocumentResolverBuildItem buildItem = MessageDocumentResolverBuildItem.builder()
+                    .preferredEngine(templateEngineConfig.getPreferredEngine())
+                    .templateResolverRouter(templateResolverRouter)
+                    .messageDocument(messageDocument)
+                    .build();
+            UssdMessageDocumentResolver documentResolver = new DefaultUssdMessageDocumentResolver(buildItem);
             applicationContext.getBeanFactory().registerSingleton(beanName, documentResolver);
         });
     }

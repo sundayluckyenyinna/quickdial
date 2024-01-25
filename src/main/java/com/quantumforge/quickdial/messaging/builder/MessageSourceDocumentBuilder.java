@@ -8,8 +8,6 @@ import java.util.List;
 
 public interface MessageSourceDocumentBuilder {
 
-    String AUTOMATIC_ERROR_LINE_TEMPLATE = "<line th:if=\"${isRedirectForOptionValidationError}\"></line>";
-
     boolean supportsDocumentType(DocumentType documentType);
     MessageDocument buildDocument(FileResource fileResources);
 

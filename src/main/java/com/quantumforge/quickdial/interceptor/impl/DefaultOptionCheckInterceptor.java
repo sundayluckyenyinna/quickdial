@@ -27,10 +27,6 @@ import java.util.stream.Collectors;
 @EnableConfigurationProperties({CommonUssdConfigProperties.class, UssdRedirectConfigProperties.class})
 public class DefaultOptionCheckInterceptor implements UssdInputValidationInterceptor {
 
-    private static final String TEMPLATE_ERROR_KEY = "isRedirectForOptionValidationError";
-    private static final String ERROR_RETRY_ATTEMPT_LEFT = "errorRetryAttemptLeft";
-    private static final String ERROR_RETRY_SUFFIX = "errorRetrySuffix";
-
     private final UssdRedirectConfigProperties redirectConfigProperties;
     private final CommonUssdConfigProperties ussdConfigProperties;
 
