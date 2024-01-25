@@ -33,13 +33,15 @@ import java.util.List;
 @RequiredArgsConstructor
 public class TestMapping {
 
-    @InjectDocument("home.quickdial")
+    @InjectDocument("home_quickdial")
     private UssdMessageDocumentResolver documentResolver;
 
     @UssdSubMenuHandler
     public String showStartPageOfCharges(UssdModel model){
         model.addObject("firstObject", "First");
         model.addObject("secondObject", "Secod");
+        List<String> list = Arrays.asList("Mango", "Apple", "Orange");
+        model.addObject("names", list);
         return documentResolver.withModel(model).getResolvedMessageById("charge");
     }
 

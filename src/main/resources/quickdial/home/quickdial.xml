@@ -12,6 +12,9 @@
                 <line option="2"> Cancel </line>
                 <line option="3"> [[${firstObject}]] </line>
                 <line option="4"> [[${secondObject}]] </line>
+                <fragment th:each="name, index:${names}">
+                    <line option="${index.count}"> [[${name}]] </line>
+                </fragment>
             </message>
 
             <!-- Message to display menus -->

@@ -1,6 +1,7 @@
 package com.quantumforge.quickdial.messaging.template.engine;
 
 import com.quantumforge.quickdial.bank.transit.impl.SimpleUssdUserSessionRegistry;
+import com.quantumforge.quickdial.common.StringValues;
 import com.quantumforge.quickdial.exception.TemplateParsingException;
 import com.quantumforge.quickdial.exception.UssdMessageNotFoundException;
 import com.quantumforge.quickdial.interceptor.UssdInputValidationInterceptor;
@@ -23,6 +24,9 @@ import org.thymeleaf.context.Context;
 
 import java.util.Map;
 import java.util.Objects;
+
+import static com.quantumforge.quickdial.messaging.config.QuickDialMessageSourceConfigDefaultProperties.XML_LINE_TAGE_RAW_SELF_CLOSING;
+import static com.quantumforge.quickdial.messaging.config.QuickDialMessageSourceConfigDefaultProperties.XML_LINE_TAG_RAW;
 
 @Slf4j
 @Getter
@@ -86,6 +90,7 @@ public final class DefaultUssdMessageDocumentResolver implements UssdMessageDocu
                 .orElseThrow(() -> new UssdMessageNotFoundException(String.format("No ussd message with id = %s was found in document with name = %s and qualified name = %s!", messageId, messageDocument.getFileName(), messageDocument.getQualifiedName())));
         String rawTaggedMessage = message.getRawTaggedMessage();
         String rawResolvedTaggedMessage = processRawMsgWithTemplateModel(rawTaggedMessage, ussdModel.getModelMap());
+        rawResolvedTaggedMessage = cleanRawMessageTemplate(rawResolvedTaggedMessage);
         Document parsedDocument  = Jsoup.parse(rawResolvedTaggedMessage, Parser.xmlParser());
         Element messageElement = parsedDocument.child(0);
         Message cleanedMessage = Message.buildSimilarCleanedMessage(message, messageElement);
@@ -106,5 +111,10 @@ public final class DefaultUssdMessageDocumentResolver implements UssdMessageDocu
             log.info("Exception occurred during template parsing. Exception message is: {}", exception.getMessage());
             throw new TemplateParsingException(exception.getMessage());
         }
+    }
+
+    private static String cleanRawMessageTemplate(String rawMessageTemplate){
+        return rawMessageTemplate.replaceFirst(XML_LINE_TAG_RAW, StringValues.EMPTY_STRING)
+                .replaceFirst(XML_LINE_TAGE_RAW_SELF_CLOSING, StringValues.EMPTY_STRING);
     }
 }

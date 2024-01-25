@@ -32,8 +32,8 @@ import static com.quantumforge.quickdial.messaging.config.QuickDialMessageSource
 @EnableConfigurationProperties(value = {UssdRedirectConfigProperties.class})
 public class XmlUssdMessageSourceDocumentBuilder implements MessageSourceDocumentBuilder {
 
-    String THYMELEAF_AUTOMATIC_ERROR_LINE_TEMPLATE = "<fragment th:if=\"${isRedirectForOptionValidationError}\">%s</fragment>";
-    String FREEMARKER_AUTOMATIC_ERROR_LINE_TEMPLATE = "<fragment><#if isRedirectForOptionValidationError>%s</#if></fragment>";
+    String THYMELEAF_AUTOMATIC_ERROR_LINE_TEMPLATE = "<line th:if=\"${isRedirectForOptionValidationError}\">%s</line>";
+    String FREEMARKER_AUTOMATIC_ERROR_LINE_TEMPLATE = "<line><#if isRedirectForOptionValidationError>%s</#if></line>";
 
     private final QuickDialMessageTemplateEngineConfig templateEngineConfig;
     private final UssdRedirectConfigProperties redirectConfigProperties;
@@ -75,7 +75,7 @@ public class XmlUssdMessageSourceDocumentBuilder implements MessageSourceDocumen
             Document documentContainingOnlyErrorLine = Jsoup.parse(getAutomaticErrorLineTemplate(), Parser.xmlParser());
             Document rawMessageDocument = Jsoup.parse(message.getRawTaggedMessage(), Parser.xmlParser());
             Element rawMessageElement = rawMessageDocument.child(0);
-            Element errorLineElement = documentContainingOnlyErrorLine.getElementsByTag(XML_FRAGMENT_TAG).first();
+            Element errorLineElement = documentContainingOnlyErrorLine.getElementsByTag(XML_LINE_TAG).first();
             assert errorLineElement != null;
             rawMessageElement.prependChild(errorLineElement);
 
@@ -84,11 +84,7 @@ public class XmlUssdMessageSourceDocumentBuilder implements MessageSourceDocumen
             errorMessageLine.getAttributes().put(XML_MESSAGE_OPTION, StringValues.EMPTY_STRING);
             errorMessageLine.setText(errorContent);
             message.getLines().add(0, errorMessageLine);
-            String rawMessageTag = rawMessageElement.toString()
-                    .replaceFirst("!--", StringValues.EMPTY_STRING)
-                    .replaceFirst("--", StringValues.EMPTY_STRING)
-                    .replaceFirst("&lt;", "<")
-                    .replaceFirst("&gt;", ">");
+            String rawMessageTag = cleanRawMessage(rawMessageElement.toString());
             message.setRawTaggedMessage(rawMessageTag);
         }
     }
@@ -102,6 +98,7 @@ public class XmlUssdMessageSourceDocumentBuilder implements MessageSourceDocumen
             default: template = THYMELEAF_AUTOMATIC_ERROR_LINE_TEMPLATE;
         }
         String redirectMessage = redirectConfigProperties.getDefaultInputValidationMessage();
+        redirectMessage = formatRedirectionMessageTagByEngine(redirectMessage, engine);
         String templateWithMessage = String.format(template, redirectMessage);
         return Parser.unescapeEntities(templateWithMessage, false);
     }
@@ -113,5 +110,23 @@ public class XmlUssdMessageSourceDocumentBuilder implements MessageSourceDocumen
             templateEngine = ModelTemplateEngine.valueOf(preferredEngine.toUpperCase());
         }catch (Exception ignored){ templateEngine = ModelTemplateEngine.THYMELEAF; }
         return templateEngine;
+    }
+
+    private static String cleanRawMessage(String rawMessageElement){
+        return rawMessageElement
+                .replaceAll("!--", StringValues.EMPTY_STRING)
+                .replaceAll("--", StringValues.EMPTY_STRING)
+                .replaceAll("&lt;", "<")
+                .replaceAll("&gt;", ">");
+    }
+
+    private String formatRedirectionMessageTagByEngine(String message, ModelTemplateEngine engine){
+        String formattedMessage;
+        switch (engine){
+            case FREEMARKER: { formattedMessage = message.replaceAll("\\[\\[", StringValues.EMPTY_STRING).replaceAll("]]", StringValues.EMPTY_STRING); break; }
+            case THYMELEAF:
+            default: formattedMessage = message;
+        }
+        return formattedMessage;
     }
 }
