@@ -3,3 +3,51 @@
 
 >Design necessity and philosophy:  **_Anything that can be built, can be built
 >declaratively!_**
+
+- [Dependency](#dependency)
+- [Ussd Architecture](#ussd-architecture)
+- [The QuickDialPayload](#quickdial-payload)
+- [Ussd mapping](#ussd-mapping)
+- [UssdExecution](#ussd-execution)
+- [Interceptors](#interceptors)
+- [Messaging](#messaging)
+- [Events](#events)
+- [ApplicationStore](#application-store)
+- [Statistics API](#statistics-api)
+- [Best Practices](#best-practices)
+- [Examples with Africa-Is-Talking](#example)
+
+
+## Dependency
+
+## Ussd Architecture
+<p align="justify">
+In every Ussd application, there is primary three (4) parties involved. These individual component parties completes the entire lifecycle for every USSD request made by the user via their mobile devices.
+</p>
+
+The diagram below shows the summary and flow of connection and call between the individual components.
+
+
+
+
+
+## The QuickDialPayload
+<p align="justify">
+The entry point between <span>quickdial</span> and a typical springboot application is the QuickDialPayload. The QuickDialPayload represents all that is needed to be passed to the <span style="font-weight: bold">quickdial</span> library. The library then will then manage all necessary complexities for Ussd session management, automatic redirection, continuation, termination, navigation and option menu input validation.
+Typically, the QuickDialPayload will be created from the incoming input of the Ussd Provider or vendor and constructed in the service layer of the springboot application. The <a>QuickDialUssdExecutor</a> interface in the library accepts the QuickDialPayload as the only input and returns a generic ussd execution result. The generic return type of the QuickDialUssdExecutor is of the same type as the return type defined by the developer in the Ussd menu handler (to be discussed below).
+</p>
+
+<p align="justify">
+<span style="font-weight: bold">Note</span>: Due to the fact that diverse Ussd Provider of choice have different payload they supplier to the developer's controller during integration, it is the responsibility of the developer to adjust the incoming Ussd Provider payload to the QuickDialPayload for use in this library. This of course, is the only work that the developer needs to do to get the library up and running.
+</p>
+
+Below outlines each fields of the QuickDialPayload.
+
+| Fields        | Description                                                                                                                                                                                      | Example Value                                 |
+|---------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------------|
+ | **sessionId** | This is the unique sessionId associated with the user's current session. It is usually supplied from the Ussd Provider and should be passed down to the QuickDialPayload.                        | 2268b0f0-7ff5-4782-bb85-368cb975b9ea          |
+  | **msisdn**    | This is the unique mobile number of the user. This is supplied by the Network Provider to the Ussd Provider who in turn supplies it to the developer's springboot controller.                    | 07021324354                                   |
+  | **telco** | This represents the Network provider of the user as at the time of the Ussd call. Again it is supplied by the Network provider via the Ussd Provider to the developer's springboot application   | MTN                                           |
+ | **originatingCode** | This represents the first Ussd code dialed by the user. Developer's can use this to determine if the user is dialing the **base code** or a **short code** associated with the Ussd integration. | *123# (base code) and *123*1*2# (short code). |
+
+
