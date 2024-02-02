@@ -6,7 +6,7 @@
 
 - [Dependency](#dependency)
 - [Ussd Architecture](#ussd-architecture)
-- [The QuickDialPayload](#quickdial-payload)
+- [QuickDialPayload](#payload)
 - [Ussd mapping](#ussd-mapping)
 - [UssdExecution](#ussd-execution)
 - [Interceptors](#interceptors)
@@ -31,7 +31,7 @@ The diagram below shows the summary and flow of connection and call between the 
 
 
 
-## The QuickDialPayload
+## QuickDialPayload
 <p align="justify">
 The entry point between <span>quickdial</span> and a typical springboot application is the QuickDialPayload. The QuickDialPayload represents all that is needed to be passed to the <span style="font-weight: bold">quickdial</span> library. The library then will then manage all necessary complexities for Ussd session management, automatic redirection, continuation, termination, navigation and option menu input validation.
 Typically, the QuickDialPayload will be created from the incoming input of the Ussd Provider or vendor and constructed in the service layer of the springboot application. The <a>QuickDialUssdExecutor</a> interface in the library accepts the QuickDialPayload as the only input and returns a generic ussd execution result. The generic return type of the QuickDialUssdExecutor is of the same type as the return type defined by the developer in the Ussd menu handler (to be discussed below).
@@ -43,11 +43,63 @@ Typically, the QuickDialPayload will be created from the incoming input of the U
 
 Below outlines each fields of the QuickDialPayload.
 
-| Fields        | Description                                                                                                                                                                                      | Example Value                                 |
-|---------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------------|
- | **sessionId** | This is the unique sessionId associated with the user's current session. It is usually supplied from the Ussd Provider and should be passed down to the QuickDialPayload.                        | 2268b0f0-7ff5-4782-bb85-368cb975b9ea          |
-  | **msisdn**    | This is the unique mobile number of the user. This is supplied by the Network Provider to the Ussd Provider who in turn supplies it to the developer's springboot controller.                    | 07021324354                                   |
-  | **telco** | This represents the Network provider of the user as at the time of the Ussd call. Again it is supplied by the Network provider via the Ussd Provider to the developer's springboot application   | MTN                                           |
- | **originatingCode** | This represents the first Ussd code dialed by the user. Developer's can use this to determine if the user is dialing the **base code** or a **short code** associated with the Ussd integration. | *123# (base code) and *123*1*2# (short code). |
+| Fields        | Description                                                                                                                                                                                                                                                                                                                                                                                                     | Example Value                                               |
+|---------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------|
+ | **sessionId** | This is the unique sessionId associated with the user's current session. It is usually supplied from the Ussd Provider and should be passed down to the QuickDialPayload.                                                                                                                                                                                                                                       | 2268b0f0-7ff5-4782-bb85-368cb975b9ea                        |
+  | **msisdn**    | This is the unique mobile number of the user. This is supplied by the Network Provider to the Ussd Provider who in turn supplies it to the developer's springboot controller.                                                                                                                                                                                                                                   | 07021324354                                                 |
+  | **telco** | This represents the Network provider of the user as at the time of the Ussd call. Again it is supplied by the Network provider via the Ussd Provider to the developer's springboot application                                                                                                                                                                                                                  | MTN                                                         |
+ | **originatingCode** | This represents the first Ussd code dialed by the user. Developer's can use this to determine if the user is dialing the **base code** or a **short code** associated with the Ussd integration.                                                                                                                                                                                                                | *123# (base code) and *123*1*2# (short code).               |
+ | **prefix** | This is used basically for simple routing of the Ussd request. Enables clean separation of logic based on the nature of the customer or user making the request                                                                                                                                                                                                                                                 | NEW_CUSTOMER                                                |
+ | **input** | This represent the current input of the user in the current ussd session                                                                                                                                                                                                                                                                                                                                        | 1                                                           |
+ | **invocationType** | This represent the ussd invocation type either of **progressive** or **shortcode**. It is the responsibility of the developer to study their respective Ussd provider and decide when a request is a progressive request or a shortcode request. In the **quickdial** library, the UssdInvocationType is an enum. If this is defined by the developer, the UssdInvocationType.PROGRESSIVE is used as a default. | UssdInvocationType.PROGRESSIVE                              |
+ | **shortCodeString** | A boolean that specifies if the incoming dialed code of the user is a **shortcodestring**. Again, it is the responsiblity of the developer to figure out the behaviour of the Ussd Provider to ascertain when a shortcodestring is passed. The default value is **false**                                                                                                                                       | true                                                        |
+ | **sessionStarting** | A boolean that specifies if the incoming dialed code of the user is a **starting session** . Again, it is the responsibility of the developer to know when the Ussd provider is starting session.                                                                                                                                                                                                               | **true**  |
+
+## Ussd mapping
+<p>
+
+</p>
+
+## UssdExecution
+<p>
+
+</p>
+
+## Interceptors
+<p>
+
+</p>
+
+## Messaging
+<p>
+
+</p>
+
+## Events
+<p>
+
+</p>
+
+
+## ApplicationStore
+<p>
+
+</p>
+
+## Statistics API
+<p>
+
+</p>
+
+## Best Practices
+<p>
+
+</p>
+
+## Examples with Africa-Is-Talking
+<p>
+
+</p>
+
 
 
