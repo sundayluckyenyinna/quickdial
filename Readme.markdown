@@ -6,6 +6,7 @@
 
 - [Dependency](#dependency)
 - [Ussd Architecture](#ussd-architecture)
+- [Autoconfiguration](#auto-configuration)
 - [QuickDialPayload](#payload)
 - [Ussd mapping](#ussd-mapping)
 - [UssdExecution](#ussd-execution)
@@ -29,6 +30,20 @@ The diagram below shows the summary and flow of connection and call between the 
 
 
 
+
+## Autoconfiguration
+<p align="justify">
+  Once the starter library is added to the developer's Springboot application, the necessary credentials of the Ussd integration should be declared in the application.yml or application.properties file.
+  Below declares the base code of the ussd action (this base code will be generated when the developer/company is fully onboarded by the UssdProvider of choice. The Ussd provider will onboarded and provide the integrated ussd code afterwards.
+
+```properties
+    ussd.properties.config.base-ussd-code=*123#
+    ussd.properties.config.go-back-option=0
+    ussd.properties.config.go-forward-option=00
+```
+With the above configurations, <strong> quickdial </strong> will automatically configure all that it needs to start. Also from the above, the declarations made in the properties file is obvious for what they intend to do.
+For example, whenever a ussd user enters <strong> 0 </strong> as an input, the framework redirects the user to the previous ussd page of the application automatically. The user will also be redirected <strong> <i> forward </i></strong> when he enters <strong> 00 </strong> as an input. The whole of the navigation algorithm is handled by <strong>quickdial</strong> and thus, the developer does not have to do any other configuration to achieve this.
+</p>
 
 
 ## QuickDialPayload
@@ -75,8 +90,8 @@ public class TestMenuHandler{
   @UssdSubMenuHandler
   public String showAccountOpeningMenus(UssdUserContext, SessionData, UssdSession){
   
-  
-}
+    return "1. Open account with BVN \n2. Open account without BVN";
+  }
 
 ```
 
