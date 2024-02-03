@@ -83,17 +83,66 @@ Now suppose that we intend to map this relationship, we can create a class calle
 ```java
 // imports
 
+import com.quantumforge.quickdial.annotation.UssdParam;
+import com.quantumforge.quickdial.annotation.UssdSubMenuHandler;
+import com.quantumforge.quickdial.context.UserUssdContext;
+import com.quantumforge.quickdial.session.SessionData;
+import com.quantumforge.quickdial.session.UssdSession;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
+@RequiredArgsConstructor
 @UssdMenuHandler(menu = "1")
-public class TestMenuHandler{
+public class TestMenuHandler {
+
+ private final UserService userService;
+
+ @UssdSubMenuHandler    // => *123*1#
+ public String showAccountOpeningMenus(UserUssdContext userUssdContext, SessionData sessionData, UssdSession ussdSession) {
+
+  return "1. Open account with BVN \n2. Open account without BVN";
+ }
 
 
-  @UssdSubMenuHandler
-  public String showAccountOpeningMenus(UssdUserContext, SessionData, UssdSession){
+ @UssdSubMenuHandler(submenu = "1")   // => *123*1*1#
+ public String enterBVNForAccountOpeningPage(UserUssdContext userUssdContext, UssdSession ussdSession) {
+  return "Enter your BVN";
+ }
+
+ @UssdSubMenuHandler(submenu = "*1*{bvnEntered}#")  // => *123*1*1*1123456789#
+ public String showBVNDetailsPage(@UssdParam("bvnEntered") String bvn, UserUssdContext userUssdContext, UssdSession ussdSession, SessionData sessionData) {
+  // log the bvn entered by the user. The @UssdParam annotation binds the bvn entered by the user the bvn variable.
+  log.info("Customer BVN entered -------------------------{}", bvn);
+  // Store the bvn entered by the user to the injected SessionData store
+  sessionData.keepAttribute("userBvn", bvn);
+  return "Name attached to BVN details is: John Doe.\n1. Continue \n2. Cancel";
+ }
+
+ @UssdSubMenuHandler(submenu = "*1*{bvnEntered}*1#")  // *123*1*1*1123456789*1#
+ public String showSuccessPage(@UssdParam("bvnEntered") String bvn, UserUssdContext userUssdContext, UssdSession ussdSession, SessionData sessionData) {
   
-    return "1. Open account with BVN \n2. Open account without BVN";
-  }
+    String mobileNumber = userUssdContext.getMsisdn();  // User mobileNumber sent from the UssdProvider via the network provider.
+    boolean success = userService.createUserAndAccountWithBvn(bvn, mobileNumber);
+    if(success){
+        return "Congrats!. Account created successfully";
+    }else{
+        return "Oops! something went wrong";
+    }
+ }
+
+
+ // Create handler methods to handle Submenu 2 (Opening Account without BVN) ...
+ @UssdSubMenuHandler(submenu = "2")   // *123*1*2#
+ public String enterFirstNamePage(UserUssdContext userUssdContext, UssdSession ussdSession) {
+
+ }
+
+}
 
 ```
+Many more example code of ussd mapping will be illustrated further in this documentation.
+
 
 ## UssdExecution
 <p>
