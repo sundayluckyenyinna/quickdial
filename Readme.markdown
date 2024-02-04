@@ -51,7 +51,7 @@ Developers on this journey usually face some (if not all) of the following chall
 If you have once developed a Ussd application, you will understand the mess you can create if you try to handle all of the above yourself. This is coupled with the fact precious development time is wasted in adjusting to new business requirements. Business would want you adjust the menus, create more menus, group menus into same context, provide automatic navigation, remove a certain menu, etc. The requirements are endless.
 </p>
 
-**Hurray** welcome to **quickdial** library. This library is a Springboot starter library that provides out of box solutions to the above challenges and more!
+**Hurray!** and welcome to **quickdial** library. This library is a Springboot starter library that provides out of box solutions to the above challenges and more!
 
 <p align="justify">
 No database configuration, no further downloads necessary, no hassle on setup, and with just adding this library as one of your dependencies, Springboot will register all of its features right into your Ussd application, leaving you write your business ussd logic straightaway without having to worry about the above challenges!
