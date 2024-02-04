@@ -2,6 +2,8 @@ package com.quantumforge.quickdial.test;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.quantumforge.quickdial.annotation.*;
+import com.quantumforge.quickdial.bank.global.ApplicationItem;
+import com.quantumforge.quickdial.bank.global.UssdItemStore;
 import com.quantumforge.quickdial.context.UserUssdContext;
 import com.quantumforge.quickdial.event.*;
 import com.quantumforge.quickdial.execution.provider.UssdInvocationType;
@@ -33,11 +35,14 @@ import java.util.List;
 @RequiredArgsConstructor
 public class TestMapping {
 
+    private final UssdItemStore ussdItemStore;
+
     @InjectDocument("home_quickdial")
     private UssdMessageDocumentResolver documentResolver;
 
     @UssdSubMenuHandler
     public String showStartPageOfCharges(UssdModel model){
+        System.out.println("This is the starting" + ussdItemStore.getItem(ApplicationItem.USSD_GO_FORWARD_OPTION));
         model.addObject("firstObject", "First");
         model.addObject("secondObject", "Secod");
         List<String> list = Arrays.asList("Mango", "Apple", "Orange");

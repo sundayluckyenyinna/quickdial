@@ -101,53 +101,119 @@ public class TestMenuHandler {
  @UssdSubMenuHandler    // => *123*1#
  public String showAccountOpeningMenus(UserUssdContext userUssdContext, SessionData sessionData, UssdSession ussdSession) {
 
-  return "1. Open account with BVN \n2. Open account without BVN";
+     return "1. Open account with BVN \n2. Open account without BVN";
  }
 
 
  @UssdSubMenuHandler(submenu = "1")   // => *123*1*1#
  public String enterBVNForAccountOpeningPage(UserUssdContext userUssdContext, UssdSession ussdSession) {
-  return "Enter your BVN";
+     return "Enter your BVN";
  }
 
  @UssdSubMenuHandler(submenu = "*1*{bvnEntered}#")  // => *123*1*1*1123456789#
  public String showBVNDetailsPage(@UssdParam("bvnEntered") String bvn, UserUssdContext userUssdContext, UssdSession ussdSession, SessionData sessionData) {
-  // log the bvn entered by the user. The @UssdParam annotation binds the bvn entered by the user the bvn variable.
-  log.info("Customer BVN entered -------------------------{}", bvn);
-  // Store the bvn entered by the user to the injected SessionData store
-  sessionData.keepAttribute("userBvn", bvn);
-  return "Name attached to BVN details is: John Doe.\n1. Continue \n2. Cancel";
+     // log the bvn entered by the user. The @UssdParam annotation binds the bvn entered by the user the bvn variable.
+     log.info("Customer BVN entered -------------------------{}", bvn);
+     // Store the bvn entered by the user to the injected SessionData store
+     sessionData.keepAttribute("userBvn", bvn);
+     return "Name attached to BVN details is: John Doe.\n1. Continue \n2. Cancel";
  }
 
- @UssdSubMenuHandler(submenu = "*1*{bvnEntered}*1#")  // *123*1*1*1123456789*1#
- public String showSuccessPage(@UssdParam("bvnEntered") String bvn, UserUssdContext userUssdContext, UssdSession ussdSession, SessionData sessionData) {
-  
-    String mobileNumber = userUssdContext.getMsisdn();  // User mobileNumber sent from the UssdProvider via the network provider.
-    boolean success = userService.createUserAndAccountWithBvn(bvn, mobileNumber);
-    if(success){
-        return "Congrats!. Account created successfully";
-    }else{
-        return "Oops! something went wrong";
-    }
- }
+  @UssdSubMenuHandler(submenu = "*1*{bvnEntered}*1#")  // *123*1*1*1123456789*1#
+  public String showSuccessPage(@UssdParam("bvnEntered") String bvn, UserUssdContext userUssdContext, UssdSession ussdSession, SessionData sessionData) {
+     String mobileNumber = userUssdContext.getMsisdn();  // User mobileNumber sent from the UssdProvider via the network provider.
+     boolean success = userService.createUserAndAccountWithBvn(bvn, mobileNumber);
+     if(success){
+         return "Congrats!. Account created successfully";
+     }else{
+         return "Oops! something went wrong";
+     }
+  }
 
 
- // Create handler methods to handle Submenu 2 (Opening Account without BVN) ...
- @UssdSubMenuHandler(submenu = "2")   // *123*1*2#
- public String enterFirstNamePage(UserUssdContext userUssdContext, UssdSession ussdSession) {
-
- }
+  // Create handler methods to handle Submenu 2 (Opening Account without BVN) ...
+  @UssdSubMenuHandler(submenu = "2")   // *123*1*2#
+  public String enterFirstNamePage(UserUssdContext userUssdContext, UssdSession ussdSession) {
+ 
+  }
 
 }
 
 ```
-Many more example code of ussd mapping will be illustrated further in this documentation.
+Many more example code of ussd mapping will be illustrated further in this documentation. Dynamic examples will be provided in the section where this library is used to integrate with **Africa-Is-Talking** Ussd provider.
+
 
 
 ## UssdExecution
 <p>
-
+ The behaviour of every session for a user can be controlled by the developer. For every ussd session/interaction, there are basically three(3) that can happen.
 </p>
+
+- Continue session
+- Redirect session
+- End session
+
+The following code snippets illustrates how the developer can control the flow of the ussd session for the user. We will rewrite the above sample codes but with the use of the UssdExecution static operational methods for ussd session control flow.
+
+```java
+
+import com.quantumforge.quickdial.annotation.UssdParam;
+import com.quantumforge.quickdial.annotation.UssdSubMenuHandler;
+import com.quantumforge.quickdial.context.UserUssdContext;
+import com.quantumforge.quickdial.payload.UssdExecution;
+import com.quantumforge.quickdial.session.SessionData;
+import com.quantumforge.quickdial.session.UssdSession;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
+@RequiredArgsConstructor
+@UssdMenuHandler(menu = "1")
+public class TestMenuHandler {
+
+ private final UserService userService;
+
+ @UssdSubMenuHandler    // => *123*1#
+ public UssdExecution<String> showAccountOpeningMenus(UserUssdContext userUssdContext, SessionData sessionData, UssdSession ussdSession) {
+    return UssdExecution.continues("1. Open account with BVN \n2. Open account without BVN");   // This continues the ussd session on showing this message or page.
+ }
+
+
+ @UssdSubMenuHandler(submenu = "1")   // => *123*1*1#
+ public UssdExecution<String> enterBVNForAccountOpeningPage(UserUssdContext userUssdContext, UssdSession ussdSession) {
+        return UssdExecution.continues("Enter your BVN"); 
+ }
+
+ @UssdSubMenuHandler(submenu = "*1*{bvnEntered}#")  // => *123*1*1*1123456789#
+ public UssdExecution<String> showBVNDetailsPage(@UssdParam("bvnEntered") String bvn, UserUssdContext userUssdContext, UssdSession ussdSession, SessionData sessionData) {
+    log.info("Customer BVN entered -------------------------{}", bvn);
+    sessionData.keepAttribute("userBvn", bvn);
+    return UssdExecution.continues("Name attached to BVN details is: John Doe.\n1. Continue \n2. Try again");
+ }
+
+ @UssdSubMenuHandler(submenu = "*1*{bvnEntered}*{continueOption}#")  // *123*1*1*1123456789*1#
+ public UssdExecution<String> showSuccessPage(@UssdParam("bvnEntered") String bvn, @UssdParam("continueOption") String option, UserUssdContext userUssdContext, UssdSession ussdSession, SessionData sessionData) {
+     // User entered 1 from above. Thus, user wants to continue
+     if(option.equalsIgnoreCase("1")) { 
+         String mobileNumber = userUssdContext.getMsisdn();  // User mobileNumber sent from the UssdProvider via the network provider.
+         boolean success = userService.createUserAndAccountWithBvn(bvn, mobileNumber);
+         if (success) {
+             return UssdExecution.continues("Congrats!. Account created successfully");
+         } else {
+             return UssdExecution.end("Oops! something went wrong");
+         }
+     }
+     
+     // User entered 2. Thus, user claims that the BVN is not his and wants to try again. We will then redirect user to the page before the above page.
+     else if(option.equalsIgnoreCase("2")){
+         UssdExecution.redirect("this::enterBVNForAccountOpeningPage");  // method to be redirected to is in same class. Thus use 'this' for shorthand
+         UssdExecution.redirect("TestMenuHandler::enterBVNForAccountOpeningPage"); // another way of redirecting with 'class::method' reference
+     }
+  }
+
+}
+
+```
 
 ## Interceptors
 <p>
