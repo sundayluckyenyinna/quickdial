@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Configuration;
 
 import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -64,4 +65,8 @@ public class SimpleUssdUserSessionRegistry implements UssdUserSessionRegistry {
         invalidateSession(session.getSessionId());
     }
 
+    @Override
+    public  Collection<UssdSession> getAllSessions(){
+        return SESSION_REGISTRY_LOG.values();
+    }
 }

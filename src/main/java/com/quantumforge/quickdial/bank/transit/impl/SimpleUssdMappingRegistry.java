@@ -40,7 +40,7 @@ public class SimpleUssdMappingRegistry implements UssdMappingRegistry {
     /**
      * The container for all registered ussd execution contexts.
      */
-    private static final List<UssdExecutable> USSD_EXECUTION_CONTEXTS = Collections.synchronizedList(new ArrayList<>());
+    public static final List<UssdExecutable> USSD_EXECUTION_CONTEXTS = Collections.synchronizedList(new ArrayList<>());
 
 
     /**

@@ -1,33 +1,17 @@
 package com.quantumforge.quickdial.test;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.quantumforge.quickdial.annotation.*;
 import com.quantumforge.quickdial.bank.global.ApplicationItem;
-import com.quantumforge.quickdial.bank.global.UssdItemStore;
-import com.quantumforge.quickdial.context.UserUssdContext;
+import com.quantumforge.quickdial.bank.global.UssdBasicItemStore;
 import com.quantumforge.quickdial.event.*;
-import com.quantumforge.quickdial.execution.provider.UssdInvocationType;
-import com.quantumforge.quickdial.messaging.bean.QuickDialMessageResource;
 import com.quantumforge.quickdial.messaging.template.engine.UssdMessageDocumentResolver;
-import com.quantumforge.quickdial.messaging.template.strut.MessageDocuments;
 import com.quantumforge.quickdial.payload.UssdExecution;
 import com.quantumforge.quickdial.session.SessionData;
 import com.quantumforge.quickdial.session.UssdModel;
-import com.quantumforge.quickdial.session.UssdSession;
 import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.context.event.EventListener;
-import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Controller;
-import org.springframework.stereotype.Service;
 
-import java.io.File;
-import java.math.BigDecimal;
 import java.util.Arrays;
-import java.util.LinkedList;
 import java.util.List;
 
 
@@ -35,7 +19,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class TestMapping {
 
-    private final UssdItemStore ussdItemStore;
+    private final UssdBasicItemStore ussdItemStore;
 
     @InjectDocument("home_quickdial")
     private UssdMessageDocumentResolver documentResolver;

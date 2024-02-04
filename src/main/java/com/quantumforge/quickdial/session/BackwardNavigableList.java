@@ -5,6 +5,7 @@ import lombok.Getter;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -15,6 +16,10 @@ public class BackwardNavigableList<E> extends ArrayList<E> {
 
     public BackwardNavigableList(){
         resetCurrentIndex();
+    }
+
+    public BackwardNavigableList(List<E> items){
+        this.addAll(items);
     }
 
     public boolean hasPrevious(){

@@ -4,6 +4,7 @@
 >Design necessity and philosophy:  **_Anything that can be built, can be built
 >declaratively!_**
 
+- [Overview](#overview)
 - [Dependency](#dependency)
 - [Ussd Architecture](#ussd-architecture)
 - [Autoconfiguration](#auto-configuration)
@@ -14,12 +15,66 @@
 - [Messaging](#messaging)
 - [Events](#events)
 - [ApplicationStore](#application-store)
-- [Statistics API](#statistics-api)
+- [UssdBasicItemStore](#ussd-basic-item-store)
+- [Statistics APIs](#statistics-api)
 - [Best Practices](#best-practices)
 - [Examples with Africa-Is-Talking](#example)
 
 
+## Overview
+<p align="justify">
+Have you ever been faced with the challenge to build a robust Ussd application? We can all testify the mess that developers can create using the traditional style of ussd application development.
+Developers on this journey usually face some (if not all) of the following challenges
+</p>
+
+-  Heavy use of **_if-else_** conditions and **_switch_** statements to track user sessions, inputs and navigation.
+
+
+-  Thin separation of concern between ussd messages and business logic.
+
+
+- Code readability and ease of maintenance.
+
+
+- Ease of configuration.
+
+
+- Performance fine-tuning.
+
+
+- Automatic Menu option validations.
+
+
+- Application statistics.
+
+<p align="justify">
+If you have once developed a Ussd application, you will understand the mess you can create if you try to handle all of the above yourself. This is coupled with the fact precious development time is wasted in adjusting to new business requirements. Business would want you adjust the menus, create more menus, group menus into same context, provide automatic navigation, remove a certain menu, etc. The requirements are endless.
+</p>
+
+**Hurray** welcome to **quickdial** library. This library is a Springboot starter library that provides out of box solutions to the above challenges and more!
+
+<p align="justify">
+No database configuration, no further downloads necessary, no hassle on setup, and with just adding this library as one of your dependencies, Springboot will register all of its features right into your Ussd application, leaving you write your business ussd logic straightaway without having to worry about the above challenges!
+</p>
+
+**quickdial** is highly configurable and the developer can specify certain behaviour of the application flow. What more? the developer can tap insights into the running application statistics!.
+
+<p align="justify">
+This documentation is a very brief descriptive summary of what the **quickdial** library can do. This documentation will be updated periodically to capture important questions raised by developers using this awesome library.
+</p>
+
 ## Dependency
+The **quickdial** library supports JDK 17 and above and is starter library for Springboot 3.xx. 
+
+To start, simply download the jar file from the source or add the following to your maven dependencies.
+
+```xml
+    <dependency>
+        <groupId>com.quantumforge</groupId>
+        <artifactId>quickdial</artifactId>
+        <version>1.0.0</version>
+    </dependency>
+```
 
 ## Ussd Architecture
 <p align="justify">
@@ -445,13 +500,106 @@ Throughout the lifecycle of the Ussd application, **quickdial** emits certain im
 
 ## ApplicationStore
 <p>
+The application store is a very convenient way of storing data that do not change frequently. This is not a necessity, but a way to improve the performance of the ussd application.
 
+For example, it is a common knowledge the bank codes of banks do not change frequently, so it is a performance boost strategy to retrieve them once during application startup and save them to the ApplicationStore. When it is needed to be displayed to the user on a ussd page, the bank information can then be fetched from the proximity of the ApplicationStore rather than by the overhead of a network call or a database lookup.
+
+The following code snippets shows how the ApplicationStore can be used to store data (for example, when the ussd context is initialized) and then displayed to the user in a UssdSubMenuHandler
 </p>
 
-## Statistics API
+```java
+
+import com.quantumforge.quickdial.bank.global.ApplicationStore;
+import com.quantumforge.quickdial.event.UssdMappingExecutionContextInitializedEvent;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.event.EventListener;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+
+@Slf4j
+@Service
+@RequiredArgsConstructor
+public class UssdEventConfiguration {
+
+    private final Webservice webservice;
+    private final ApplicationStore applicationStore;
+
+    @EventListener(value = UssdMappingExecutionContextInitializedEvent.class)
+    public void configuration() {
+        List<BankData> bankData = webservice.getAllBankData();
+        applicationStore.setItem("bankData", bankData);
+    }
+}
+```
+
+```java
+
+import com.quantumforge.quickdial.annotation.InjectDocument;
+import com.quantumforge.quickdial.annotation.UssdMenuHandler;
+import com.quantumforge.quickdial.annotation.UssdSubMenuHandler;
+import com.quantumforge.quickdial.bank.global.ApplicationStore;
+import com.quantumforge.quickdial.messaging.template.engine.UssdMessageDocumentResolver;
+import com.quantumforge.quickdial.payload.UssdExecution;
+import com.quantumforge.quickdial.session.SessionData;
+import com.quantumforge.quickdial.session.UssdModel;
+import com.quantumforge.quickdial.session.UssdSession;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
+import java.util.List;
+
+@Slf4j
+@UssdMenuHandler
+@RequiredArgsConstructor
+public class TestMenuHandler {
+
+    @InjectDocument("home_quickdial")
+    private final UssdMessageDocumentResolver documentResolver;
+    private final ApplicationStore applicationStore;
+
+    @UssdSubMenuHandler
+    public UssdExecution<String> showBanksForTransaction(UssdModel ussdModel, SessionData sessionData, UssdSession session) {
+        List<String> bankData = (List<BankData>) applicationStore.getItem("bankData");
+        List<String> bankNames = bankData.stream().map(data -> data.getBankName());
+        ussdModel.addObject("bankNames", bankNames);
+        String message = documentResolver.withModel(ussdModel).getResolvedMessageById("bank-message");
+        return UssdExecution.continues(message);
+    }
+}
+```
+
+The ApplicationStore is used to store data that do not frequently change and that is not necessarily tied to a specific user. For example, the Bank data is not a property of a user, but for the application. All users will be shown the same bank data.
+
+## Statistics APIs
 <p>
+This feature of <strong>quickdial</strong> provides an HTTP endpoints to provide vital statistics of the ussd application. 
 
+The following shows the API contracts available within the <strong> quickdial </strong> library.
 </p>
+
+```json lines
+    1. Get all application message documents
+
+        Endpoint: http://<host>:<port>/quickdial/message-documents
+        Method: GET
+
+    2. Get all ussd application mappings
+
+        Endpoint: http://<host>:<port>/quickdial/mappings
+        Method: GET
+
+    3. Get all the current execution context for a user
+
+        Endpoint: http://<host>:<port>/quickdial/user/contexts/{sessionId}
+        Method: GET
+
+    4. Get all running session contexts for all users
+        
+        Endpoint: http://<host>:<port>/quickdial/contexts/sessions
+        Method: GET
+```
 
 ## Best Practices
 <p>

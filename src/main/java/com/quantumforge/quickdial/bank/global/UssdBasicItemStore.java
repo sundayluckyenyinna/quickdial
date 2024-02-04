@@ -13,7 +13,7 @@ import java.util.Map;
 @Slf4j
 @Configuration
 @RequiredArgsConstructor
-public class UssdItemStore {
+public class UssdBasicItemStore {
 
     private final CommonUssdConfigProperties configProperties;
     private static final Map<ApplicationItem, Object> USSD_ITEM_STORE =  new LinkedHashMap<>();
@@ -28,11 +28,11 @@ public class UssdItemStore {
 
     @EventListener(value = UssdMappingExecutionContextInitializedEvent.class)
     public void configureUssdStore(){
-        log.info("Starting Initialization of Ussd common configuration properties to UssdItemStore");
+        log.info("Starting Initialization of Ussd common configuration properties to UssdBasicItemStore");
         setItem(ApplicationItem.USSD_BASE_CODE, configProperties.getBaseUssdCode());
         setItem(ApplicationItem.USSD_GO_BACK_OPTION, configProperties.getGoBackOption());
         setItem(ApplicationItem.USSD_GO_FORWARD_OPTION, configProperties.getGoForwardOption());
         setItem(ApplicationItem.ACCEPTABLE_INPUT_TRIAL_TIMES, configProperties.getAcceptableInputTrialTimes());
-        log.info("Finished Initialization of Ussd common configuration properties to UssdItemStore");
+        log.info("Finished Initialization of Ussd common configuration properties to UssdBasicItemStore");
     }
 }
