@@ -40,7 +40,7 @@ public class DefaultOptionCheckInterceptor implements UssdInputValidationInterce
         UssdModel userUssdModel = ussdSession.getUssdModel();
         int maximumRetryTimes = ussdConfigProperties.getAcceptableInputTrialTimes();
         UssdUserExecutionContext currentContext = ussdSession.getExecutionContextChain().getCurrentElement();
-        if(Objects.nonNull(currentContext) && ussdConfigProperties.isEnableMenuOptionCheck()){
+        if(Objects.nonNull(currentContext) && !currentContext.isRelaxMenuOptionCheck() && ussdConfigProperties.isEnableMenuOptionCheck()){
             Message message = currentContext.getResultingMessage();
             if(Objects.nonNull(message) && !isSpecialInput(incomingInput)) {
                 List<String> optionsInMessage = getOptionsInMessage(message);

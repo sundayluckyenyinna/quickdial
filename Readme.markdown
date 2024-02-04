@@ -145,7 +145,7 @@ Many more example code of ussd mapping will be illustrated further in this docum
 
 
 ## UssdExecution
-<p>
+<p align="justify">
  The behaviour of every session for a user can be controlled by the developer. For every ussd session/interaction, there are basically three(3) that can happen.
 </p>
 
@@ -216,19 +216,231 @@ public class TestMenuHandler {
 ```
 
 ## Interceptors
-<p>
-
+<p align="justify">
+Interceptors are very important aspect of the quickdial library. They provide automatic interference to the smooth and smart behaviour of the ussd application.
 </p>
+<p align="justify">
+There are 3 major interceptors currently supported.
+</p>
+
+- Backward navigation interceptor
+- Forward navigation interceptor
+- Option check interceptor
+
+<p align="justify">
+The Backward and the forward interceptors have been discussed in the <strong>AutoConfiguration</strong> section of this documentation.
+</p>
+<p align="justify">
+The Option check interceptor is an interceptor that ensures that the <strong>input</strong> correctly entered by the user is among the <strong>menu options</strong> displayed by the previous page.
+If the previous page is not a type that has menu options, this interceptor passes. Thus it makes menu validation easy for the developer by abstracting away the logic of menu options to user input validations. Developers can focus on the implementations based on different input of the user without bothering about the input validation.
+
+Following below dictates how this feature can be autoconfigured
+</p>
+
+```properties
+ ussd.properties.config.enable-menu-option-check=true
+ ussd.redirect.enable-automatic-error-redirection-message=true 
+ ussd.redirect.inputValidationErrorRedirectReference=class::method (the default is the first page)
+ ussd.redirect.defaultInputValidationMessage=Invalid input. Please select correct option. [[${errorRetryAttemptLeft}]] [[${errorRetrySuffix}]] left.
+```
+Also, an option can be passed to the UssdSubMenuHandler annotation of the handler methods to instruct **quickdial** to skip menu option validation for the said handler.
+
+```java
+
+import com.quantumforge.quickdial.annotation.UssdSubMenuHandler;
+
+public class TestMenuHandler {
+    
+    // Turn off menu option check
+    @UssdSubMenuHandler(submenu = "1", relaxMenuOptionCheck = true)
+    public UssdExecution<String> showMenus() {
+
+    }
+}
+```
 
 ## Messaging
-<p>
-
+<p align="justify">
+It is a common practice for ussd messages to be hardcoded in the ussd application. The <strong>quickdial</strong> library helps to provide sane abstraction of messages from the main ussd application logic.
 </p>
+<p align="justify">
+The quickdial library provides two options for building messages sent to the ussd user. These options include
+</p>
+
+1. Class based message builders. This includes:
+     - SimpleLineWriter
+     - OptionLineWriter
+     - CompositeLineWriter
+   
+The code snippets below illustrates how to use the OptionLineBuilder to create create dynamic messages with options in the same instance they are inserted.
+
+```java
+
+import com.quantumforge.quickdial.annotation.UssdSubMenuHandler;
+import com.quantumforge.quickdial.messaging.template.instrumentation.OptionLineWriter;
+import com.quantumforge.quickdial.payload.UssdExecution;
+
+
+public class TestMenuHandler {
+
+     @UssdSubMenuHandler(submenu = "1")    // => *123*1#
+     public UssdExecution<String> showAccountOpeningMenus(UserUssdContext userUssdContext, SessionData sessionData, UssdSession ussdSession) {
+          String message = OptionLineWriter.start()
+                  .addLine("1", "Open account with BVN")
+                  .addLine("2", "Open account without BVN")
+                  .join();  // Build the final message by calling the 'join()' method.
+          return UssdExecution.continues(message);
+     }
+}
+```
+.
+
+2. **Xml Based message builder**
+
+The above shows how the developer can build his/her message to the ussd user within the ussd logic. However, the problem of abstraction still remains a problem here.
+It is clear that the message is not totally separated from the application menu handling logic.
+
+The use of XML based message templates helps to fulfill this requirement. The following shows the steps to using the XML based messaging technique
+
+- **Step 1**
+  
+    Configure the single source folders of all your messages. The folder will be scanned by the **quickdial** library at application startup and keep them in its message contexts and later make available for injection when needed.
+    
+    There are two ways to provide the source folder for all messages.
+    
+   1. Enable springboot autoconfiguration
+
+    ```properties
+        quick-dial.template-path=#your template path (default is 'quickdial') in /resources/quickdial
+    ```
+  2. Manually provide a bean of the **QuickDialMessageResource** in a ny discoverable Configuration class.
+
+    ```java
+        
+        import com.quantumforge.quickdial.messaging.bean.QuickDialMessageResource;import org.springframework.context.annotation.Bean;import java.io.File;public class TestMenuHandler{
+  
+  
+            @Bean
+            public QuickDialMessageResource quickDialMessageResource(){
+                return QuickDialMessageResource.builder()
+                    .primaryResourceFolder(new File("/path/to/file"))
+                    .name("optional custom name for the file")
+                    .build();
+            }     
+        } 
+    ```
+    It should be noted that the developer can provide as much XML template files as possible. The xml files can also be nested within the source root folder configured by any of the above options. The **quickdial** library will **_recursively_** scan all messages in all files and store its in its context for use.
+
+The following snapshot shows a sample of a developer's resources folder for the ussd application. Here the **quickdial** folder is the root source of the message xml files. This means ALL xml files will be scanned **_recursively_** for their internal messages.
+
+![img_1.png](img_1.png)
+.
+
+Now, how do we get the **_qualified name_** of the document? How does the **quickdial** library knows which document contains which message?
+
+The simple answer to the above question is that the **quickdial** library uses the qualified name of each document. The qualified name of each document is obtained by navigating recursively the relative path of the xml file starting from the root source. Then each relative path is concatenated one to another with a configurable joiner. By default, this joiner is an underscore ( **_** )
+
+From the above snapshot, we can have the following qualified name for each xml message resource.
+
+| File name | Relative path                                  | qualified name |
+|-----------|------------------------------------------------|----------------|
+ | quickdial.xml | / resources / quickdial / home / quickdial.xml | home_quickdial |
+ | account.xml | / resources / quickdial / account.xml | account.xml |
+
+.
+- **Step 2**
+
+Write messages in the xml files. The following depicts a typical xml message source and note its **_qualified name_**
+```xml
+<?xml version="1.0" encoding="UTF-8" xmlns:th="http://www.thymeleaf.org" lang="en" ?>
+<ussd>
+    <quickdial>
+        <messages>
+
+            <message id="charge">
+                <line> Dear customer, a charge of N5.00 will be applied for this service. </line>
+                <line/>
+                <line option="1"> Continue </line>
+                <line option="2"> Cancel </line>
+                <line option="3"> [[${accountNumber}]] </line>
+                <line option="4"> [[${customerId}]] </line>
+                <fragment th:each="name, index:${preferences}">
+                    <line option="${index.count}"> [[${name}]] </line>
+                </fragment>
+            </message>
+        </messages>
+    </quickdial>
+</ussd>
+```
+
+The following rules must be applied when using the XML message template:
+
+- No two message tags can have the same **messageId** in the file. The messageId must be a unique attribute of the message tag.
+- There is no hard rule to the structure of the xml template. However, the **_all message tag must be within the messages tag_**
+- If no messageId is supplied in the message tag attribute, **quickdial** will generate a random string id.
+
+.
+
+3. **Step 3**
+
+Inject the document of choice in a handler class by virtue of its qualified name. The operation and functionality of the documents is held in a **UssdMessageDocumentResolver** interface.
+
+The following illustrates the use of the UssdMessageDocumentResolver interface to read a message given a specified **messageId**
+
+```java
+    
+    public class TestMenuHandler{
+
+        @InjectDocument("home_quickdial")    // use the qualified name to inject the document to be used
+        private UssdMessageDocumentResolver documentResolver;
+
+        @UssdSubMenuHandler
+        public String showStartPageOfCharges(UssdModel model){
+            model.addObject("accountNumber", "2020202020");
+            model.addObject("customerId", "123456");
+            List<String> userPreferences = Arrays.asList("Account creation", "Customer Onboarding");
+            model.addObject("preferences", userPreferences);
+            return documentResolver.withModel(model).getResolvedMessageById("charge");  // Get a particular message by virtue of the messageId in the qualified document.
+        }
+    }
+```
+
+From the above, it is clear that there is now total separation between the ussd messages and the application logic. 
+
+Also, the xml file supports all templating pattern provided by the developer choice of common template engines. **quickdial** supports two (2) template engines at the moment.
+
+- Thymeleaf (default)
+- Apache freemarker
+
+The following configurations shows how to choose the preferred template engine for the developer.
+
+```properties
+    quick-dial.messages.template.preferredEngine =thymeleaf
+```
+
+Other configurations related to the messaging includes
+
+```properties
+    quick-dial.enableVerboseTemplateLogging=true                            // logs verbose information about each document at application startup
+    quickdial.nestedFileSeparator=UNDER_SCORE (other value is DOT)          // specify the joiner or operator for the qualified name of the documents
+    quickdial.optionToMessageSeparator=". " (default)                       // specifies the joiner between each option and content of a message line
+```
+The above shows that all templating pattern of the thymeleaf will be supported and the thymeleaf template context for data replacement will be read from the **UssdModel** auto-injectable in the UssdSubMenuHandler methods.
 
 ## Events
 <p>
-
+Throughout the lifecycle of the Ussd application, **quickdial** emits certain important events that the developer can hook up on to perform certain operation. The table below shows a summary of the events, the time of events publication and the event object available for use in the listener operation.
 </p>
+
+| Event | Description                                                                                                                       | Event object         | 
+|-------|-----------------------------------------------------------------------------------------------------------------------------------|----------------------|
+| UssdMappingExecutionContextInitializedEvent | Published when all sole and group ussd mappings have been initialized                                                             | List(UssdExecutable) |
+| UssdMessageDocumentContainerInitializedEvent | Published when all message source files have been successfully scanned and all messages therein are stored in the message context | MessageDocuments |
+| UssdUserSessionInitializedEvent | Published when a new session for a user is initialized successfully                                                               | UssdSession source, SessionInitData sessionInitData |
+| UssdUserSessionPostDestroyedEvent | Publised just after a user session is destroyed.                                                                                  | UssdSession (with all fields as NULL) |
+| UssdUserSessionPreDestroyedEvent | Publised just before a user session is destroyed | UssdSession |
+| UssdUserSessionUpdatedEvent | Publised when a user session is updated as the user continues through the session | UssdSession source, SessionInitData initData |
+
 
 
 ## ApplicationStore

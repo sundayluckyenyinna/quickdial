@@ -12,4 +12,5 @@ public @interface UssdSubMenuHandler {
     String id() default StringValues.EMPTY_STRING;
     String submenu() default StringValues.EMPTY_STRING;
     boolean relaxBackwardNavigation() default false;
+    boolean relaxMenuOptionCheck() default false;
 }

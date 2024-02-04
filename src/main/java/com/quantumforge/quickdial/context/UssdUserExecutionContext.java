@@ -1,5 +1,6 @@
 package com.quantumforge.quickdial.context;
 
+import com.quantumforge.quickdial.annotation.UssdSubMenuHandler;
 import com.quantumforge.quickdial.execution.provider.UssdInvocationType;
 import com.quantumforge.quickdial.messaging.template.strut.Message;
 import com.quantumforge.quickdial.util.QuickDialUtil;
@@ -40,6 +41,11 @@ public class UssdUserExecutionContext {
         boolean isSole = executionContext.getParentExecutionType() == UssdExecutableType.SOLE_EXECUTABLE;
         boolean hasNoGroup = Objects.isNull(executionContext.getGroupMapping());
         return isSole && hasNoGroup;
+    }
+
+    public boolean isRelaxMenuOptionCheck(){
+        UssdSubMenuHandler subMenuHandler = getExecutionContext().getUssdSubMenuHandler();
+        return Objects.nonNull(subMenuHandler) && subMenuHandler.relaxBackwardNavigation();
     }
 
     public void updateInputAndCorrespondingContextData(String input){
