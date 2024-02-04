@@ -579,7 +579,7 @@ This feature of <strong>quickdial</strong> provides an HTTP endpoints to provide
 The following shows the API contracts available within the <strong> quickdial </strong> library.
 </p>
 
-```json
+```html
     1. Get all application message documents
 
         Endpoint: http://<host>:<port>/quickdial/message-documents
