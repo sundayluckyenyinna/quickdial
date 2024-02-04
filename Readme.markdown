@@ -60,7 +60,7 @@ No database configuration, no further downloads necessary, no hassle on setup, a
 **quickdial** is highly configurable and the developer can specify certain behaviour of the application flow. What more? the developer can tap insights into the running application statistics!.
 
 <p align="justify">
-This documentation is a very brief descriptive summary of what the **quickdial** library can do. This documentation will be updated periodically to capture important questions raised by developers using this awesome library.
+This documentation is a very brief descriptive summary of what the power of the <strong>quickdial</strong> library and what it can do. This documentation will be updated periodically to capture important questions raised by developers using this awesome library.
 </p>
 
 ## Dependency
