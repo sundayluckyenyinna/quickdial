@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Configuration;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
+import org.thymeleaf.spring6.SpringTemplateEngine;
 
 import java.util.Map;
 
@@ -12,10 +13,10 @@ import java.util.Map;
 @Configuration
 @RequiredArgsConstructor
 public class ThymeleafTemplateResolver implements TemplateResolver{
-    private static final TemplateEngine TEMPLATE_ENGINE = new TemplateEngine();
+    private static final TemplateEngine TEMPLATE_ENGINE = new SpringTemplateEngine();
 
     @Override
-    public String resolve(String rawTemplate, Map<String, Object> model) throws Exception{
+    public String resolve(String rawTemplate, Map<String, Object> model) {
         Context context = new Context();
         model.forEach(context::setVariable);
         return TEMPLATE_ENGINE.process(rawTemplate, context);

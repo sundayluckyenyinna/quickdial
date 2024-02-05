@@ -6,6 +6,7 @@ import com.quantumforge.quickdial.messaging.config.QuickDialMessageSourceConfigu
 import com.quantumforge.quickdial.util.GeneralUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -17,6 +18,7 @@ import java.io.IOException;
 
 @Slf4j
 @Configuration
+@AutoConfiguration
 @RequiredArgsConstructor
 public class QuickDialMessageSourceConfig {
 
@@ -25,13 +27,18 @@ public class QuickDialMessageSourceConfig {
     @Bean
     @ConditionalOnMissingBean
     public QuickDialMessageResource defaultQuickDialMessageResource() throws IOException {
-        if(!GeneralUtils.isNullOrEmpty(properties.getTemplatePath())){
-            return QuickDialMessageResource.builder()
-                    .primaryResourceFolder(getClassPathUssdMessageDocumentFolder())
-                    .name(StringValues.EMPTY_STRING)
-                    .build();
+        try {
+            if (!GeneralUtils.isNullOrEmpty(properties.getTemplatePath())) {
+                return QuickDialMessageResource.builder()
+                        .primaryResourceFolder(getClassPathUssdMessageDocumentFolder())
+                        .name(StringValues.EMPTY_STRING)
+                        .build();
+            }
+            return new QuickDialMessageResource();
+        }catch (Exception exception){
+            log.error("Base message root folder source initialization error: {}", exception.getMessage());
+            return null;
         }
-        return new QuickDialMessageResource();
     }
 
     private File getClassPathUssdMessageDocumentFolder() throws IOException {

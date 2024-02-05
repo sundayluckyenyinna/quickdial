@@ -25,7 +25,6 @@ public class ClassToMethodReferenceResolverUtils {
             return resultantId;
         }
         String simpleClassName = ussdExecutionContext.getCallableClass().getSimpleName();
-        simpleClassName = GeneralUtils.cleanClassNameFromSpringEnhancerSuffix(simpleClassName);
         String simpleMethodName = ussdExecutionContext.getInvocableMethod().getName();
         String joiner = getReferenceCoordinateJoinerByReferenceFormat();
         return String.join(joiner, simpleClassName, simpleMethodName);
@@ -34,7 +33,6 @@ public class ClassToMethodReferenceResolverUtils {
     public String resolveUssdContextIdFromRedirectionRule(String redirectionId, Class<?> callableClass){
          if(redirectionId.trim().startsWith(SAME_CLASS_REFERENCE)){
              String simpleClassName = callableClass.getSimpleName();
-             simpleClassName = GeneralUtils.cleanClassNameFromSpringEnhancerSuffix(simpleClassName);
              return redirectionId.replace(SAME_CLASS_REFERENCE, simpleClassName);
          }
          return redirectionId;

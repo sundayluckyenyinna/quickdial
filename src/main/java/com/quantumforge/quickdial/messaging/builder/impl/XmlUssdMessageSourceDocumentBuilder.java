@@ -4,7 +4,7 @@ import com.quantumforge.quickdial.common.StringValues;
 import com.quantumforge.quickdial.execution.result.UssdRedirectConfigProperties;
 import com.quantumforge.quickdial.messaging.builder.DocumentType;
 import com.quantumforge.quickdial.messaging.builder.MessageSourceDocumentBuilder;
-import com.quantumforge.quickdial.messaging.config.QuickDialMessageTemplateEngineConfig;
+import com.quantumforge.quickdial.messaging.config.QuickDialMessageTemplateEngineConfigProperties;
 import com.quantumforge.quickdial.messaging.template.resolvers.ModelTemplateEngine;
 import com.quantumforge.quickdial.messaging.template.strut.FileResource;
 import com.quantumforge.quickdial.messaging.template.strut.Message;
@@ -35,7 +35,7 @@ public class XmlUssdMessageSourceDocumentBuilder implements MessageSourceDocumen
     String THYMELEAF_AUTOMATIC_ERROR_LINE_TEMPLATE = "<line th:if=\"${isRedirectForOptionValidationError}\">%s</line>";
     String FREEMARKER_AUTOMATIC_ERROR_LINE_TEMPLATE = "<line><#if isRedirectForOptionValidationError>%s</#if></line>";
 
-    private final QuickDialMessageTemplateEngineConfig templateEngineConfig;
+    private final QuickDialMessageTemplateEngineConfigProperties templateEngineConfigProperties;
     private final UssdRedirectConfigProperties redirectConfigProperties;
 
     @Override
@@ -104,7 +104,7 @@ public class XmlUssdMessageSourceDocumentBuilder implements MessageSourceDocumen
     }
 
     private ModelTemplateEngine getPreferredTemplateEngine(){
-        String preferredEngine = templateEngineConfig.getPreferredEngine();
+        String preferredEngine = templateEngineConfigProperties.getPreferredEngine();
         ModelTemplateEngine templateEngine;
         try{
             templateEngine = ModelTemplateEngine.valueOf(preferredEngine.toUpperCase());

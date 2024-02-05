@@ -1,6 +1,5 @@
 package com.quantumforge.quickdial.bank.transit.impl;
 
-import com.quantumforge.quickdial.bank.global.ApplicationStore;
 import com.quantumforge.quickdial.bank.transit.UssdMappingRegistry;
 import com.quantumforge.quickdial.bank.transit.factory.UssdMappingContextProviderFactory;
 import com.quantumforge.quickdial.bank.transit.factory.UssdMappingContextRegistrationFactory;
@@ -13,7 +12,7 @@ import com.quantumforge.quickdial.exception.NoUssdMappingFoundException;
 import com.quantumforge.quickdial.util.QuickDialUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.boot.context.event.ApplicationContextInitializedEvent;
+import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.context.event.ApplicationStartedEvent;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
@@ -22,15 +21,14 @@ import org.springframework.context.event.EventListener;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static com.quantumforge.quickdial.util.GeneralUtils.cleanClassNameFromSpringEnhancerSuffix;
 
 @Slf4j
 @Configuration
+@AutoConfiguration
 @RequiredArgsConstructor
 @EnableConfigurationProperties(CommonUssdConfigProperties.class)
 public class SimpleUssdMappingRegistry implements UssdMappingRegistry {
 
-    private final ApplicationStore applicationStore;
     private final QuickDialUtil quickDialUtil;
     private final CommonUssdConfigProperties ussdConfigProperties;
     private final UssdMappingContextProviderFactory mappingContextProviderFactory;
@@ -138,9 +136,9 @@ public class SimpleUssdMappingRegistry implements UssdMappingRegistry {
             boolean isOneOfThemParameterized = quickDialUtil.isParamMapping(incomingContext.getUssdMapping()) || quickDialUtil.isParamMapping(matchingContext.getUssdMapping());
             boolean isExactlySame = incomingContext.getUssdMapping().equalsIgnoreCase(matchingContext.getUssdMapping());
             if(isOneOfThemParameterized || isExactlySame) {
-                String inClass = cleanClassNameFromSpringEnhancerSuffix(incomingContext.getCallableClass().getName());
+                String inClass = incomingContext.getCallableClass().getName();
                 String inMethod = incomingContext.getInvocableMethod().getName();
-                String matClass = cleanClassNameFromSpringEnhancerSuffix(matchingContext.getCallableClass().getName());
+                String matClass = matchingContext.getCallableClass().getName();
                 String matMethod = matchingContext.getInvocableMethod().getName();
                 throw new AmbiguousUssdMappingException(String.format("Ambiguous mapping for ussd mapping %s defined on method '%s' in class '%s'. A similar mapping of %s was found on method '%s' in class '%s'", incomingContext.getUssdMapping(), inMethod, inClass, matchingContext.getUssdMapping(), matMethod, matClass));
             }
@@ -149,19 +147,17 @@ public class SimpleUssdMappingRegistry implements UssdMappingRegistry {
 
     @EventListener(value = ApplicationStartedEvent.class)
     public void logRegisteredUssdExecutionContextAndPublishEvent(){
-        if(ussdConfigProperties.isEnableVerboseMappingLogs()) {
+        if(ussdConfigProperties.isEnableVerboseMappingLogs() && !USSD_EXECUTION_CONTEXTS.isEmpty()) {
             System.out.println();
             log.info("============================================= USSD EXECUTION CONTEXT MAPPINGS =============================================");
             USSD_EXECUTION_CONTEXTS.stream().sorted(Comparator.comparingInt(UssdExecutable::mappingLength)).forEach(ussdExecutable -> {
                 boolean isLastMessage = USSD_EXECUTION_CONTEXTS.indexOf(ussdExecutable) == USSD_EXECUTION_CONTEXTS.size() - 1;
-                if(ussdExecutable instanceof SoleUssdExecutionContextWrapper){
-                    SoleUssdExecutionContextWrapper soleUssdExecutionContextWrapper = (SoleUssdExecutionContextWrapper) ussdExecutable;
+                if(ussdExecutable instanceof SoleUssdExecutionContextWrapper soleUssdExecutionContextWrapper){
                     UssdExecutionContext executionContext = soleUssdExecutionContextWrapper.getUssdExecutionContext();
                     logUssdExecutionContext(executionContext);
                 }
-                else if(ussdExecutable instanceof GroupUssdExecutableContextWrapper){
+                else if(ussdExecutable instanceof GroupUssdExecutableContextWrapper groupUssdExecutableContextWrapper){
                     log.info("");
-                    GroupUssdExecutableContextWrapper groupUssdExecutableContextWrapper = (GroupUssdExecutableContextWrapper) ussdExecutable;
                     log.info("             ________________________Group Mapping Context__________________________       ");
                     log.info("                                                |                                           ");
                     groupUssdExecutableContextWrapper.getUssdExecutionContexts().forEach(ussdExecutionContext -> {
@@ -185,7 +181,7 @@ public class SimpleUssdMappingRegistry implements UssdMappingRegistry {
         log.info("Ussd Mapping: {}", executionContext.getUssdMapping());
         log.info("Invocation Method: {}", executionContext.getInvocableMethod().getName());
         log.info("RedirectID: {}", executionContext.getContextId());
-        log.info("Declaring class: {}", cleanClassNameFromSpringEnhancerSuffix(executionContext.getCallableClass().getName()));
+        log.info("Declaring class: {}", executionContext.getCallableClass().getName());
         log.info("Spring Enhanced class: {}", executionContext.getCallableClass().getName());
         log.info("Parent execution type: {}", executionContext.getParentExecutionType());
     }

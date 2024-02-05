@@ -5,23 +5,21 @@ import com.quantumforge.quickdial.annotation.UssdMenuHandler;
 import com.quantumforge.quickdial.annotation.UssdSubMenuHandler;
 import com.quantumforge.quickdial.bank.transit.UssdMappingRegistry;
 import com.quantumforge.quickdial.bank.transit.factory.UssdStringMappingConstructor;
+import com.quantumforge.quickdial.common.StringValues;
 import com.quantumforge.quickdial.context.UssdExecutableType;
 import com.quantumforge.quickdial.context.UssdExecutionContext;
 import com.quantumforge.quickdial.execution.result.ClassToMethodReferenceResolverUtils;
-import com.quantumforge.quickdial.messaging.template.engine.UssdMessageDocumentResolver;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.util.ClassUtils;
 
-import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Configuration
@@ -35,17 +33,18 @@ public class UssdMappingRegistryBootstrap {
 
 
     @Bean
-    public void initUssdMappingRegistration(){
+    public String initUssdMappingRegistration(){
         Map<String, Object> beansWithAnnotation = applicationContext.getBeansWithAnnotation(UssdMenuHandler.class);
+
         for(Map.Entry<String, Object> entry : beansWithAnnotation.entrySet()) {
             String beanName = entry.getKey();
             Object callableObjectInstance = entry.getValue();
-            Class<?> beanClass = applicationContext.getBean(beanName).getClass();
+            Class<?> beanClass = ClassUtils.getUserClass(applicationContext.getBean(beanName).getClass());
 
             List<Method> subHandlerMethods = Arrays.stream(beanClass.getMethods())
                     .peek(method -> method.setAccessible(true))
                     .filter(method -> method.isAnnotationPresent(UssdSubMenuHandler.class))
-                    .collect(Collectors.toList());
+                    .toList();
 
             subHandlerMethods.forEach(method -> {
                 UssdMenuHandler menuHandler = method.getDeclaringClass().getAnnotation(UssdMenuHandler.class);
@@ -68,5 +67,6 @@ public class UssdMappingRegistryBootstrap {
                 ussdMappingRegistry.registerUssdMapping(executionContext);
             });
         }
+        return StringValues.BEAN_CREATION_SUCCESS;
     }
 }

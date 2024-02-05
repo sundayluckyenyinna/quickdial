@@ -127,8 +127,9 @@ public class QuickDialUtil {
     }
 
     @Bean
-    public void configureStaticUssdUtilProperties(){
+    public String configureStaticUssdUtilProperties(){
         sProperties = properties;
         sConfigProperties = configProperties;
+        return StringValues.BEAN_CREATION_SUCCESS;
     }
 }

@@ -1,8 +1,10 @@
 package com.quantumforge.quickdial.event;
 
+import com.quantumforge.quickdial.common.StringValues;
 import com.quantumforge.quickdial.context.UssdExecutable;
 import com.quantumforge.quickdial.messaging.template.strut.MessageDocuments;
 import com.quantumforge.quickdial.session.UssdSession;
+import com.quantumforge.quickdial.util.GeneralUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
@@ -20,15 +22,20 @@ public class UssdEventPublisher {
     private static ApplicationEventPublisher sApplicationEventPublisher;
 
     @Bean
-    public void ussdEventPublisherConfiguration(){
+    public String ussdEventPublisherConfiguration(){
         sApplicationEventPublisher = applicationEventPublisher;
+        return StringValues.BEAN_CREATION_SUCCESS;
     }
 
     public void publishUssdEvent(UssdApplicationEvent event){
         applicationEventPublisher.publishEvent(event);
     }
     public static void staticPublishEvent(UssdApplicationEvent event){
-        sApplicationEventPublisher.publishEvent(event);
+        try {
+            sApplicationEventPublisher.publishEvent(event);
+        }catch (Exception exception){
+            log.error("Exception occurred while trying to publish application event: {}", exception.getMessage());
+        }
     }
 
 
@@ -55,8 +62,10 @@ public class UssdEventPublisher {
 
     // MESSAGE DOCUMENTS
     public static void publishMessageDocumentInitializedEvent(MessageDocuments messageDocuments){
-        UssdMessageDocumentContainerInitializedEvent documentContainerInitializedEvent = new UssdMessageDocumentContainerInitializedEvent(messageDocuments);
-        staticPublishEvent(documentContainerInitializedEvent);
+        if(!GeneralUtils.isNullOrEmpty(messageDocuments)) {
+            UssdMessageDocumentContainerInitializedEvent documentContainerInitializedEvent = new UssdMessageDocumentContainerInitializedEvent(messageDocuments);
+            staticPublishEvent(documentContainerInitializedEvent);
+        }
     }
 
     // USSD-MAPPING

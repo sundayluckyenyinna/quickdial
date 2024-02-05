@@ -37,9 +37,10 @@ public class UssdExecutionReflectionInvocationUtils {
     private static ConversionService conversionService;
     private static List<UssdExecutionResultResolver> executionResultResolvers;
     @Bean
-    public void configureConversionService(){
+    public String configureConversionService(){
         conversionService = beanConversionService;
         executionResultResolvers = beanExecutionResultResolvers;
+        return StringValues.BEAN_CREATION_SUCCESS;
     }
 
     public static Object invokeUssdExecutionForSession(UssdUserExecutionContext ussdUserExecutionContext, UssdSession session){

@@ -13,11 +13,19 @@ import org.springframework.context.annotation.Import;
 @Configuration
 @AutoConfiguration
 @Import(value = {
-        SimpleApplicationStore.class, UssdBasicItemStore.class, DirectUssdMapTypeContextContextProvider.class,
-        GroupUssdMappingContextRegistrar.class, ParamUssdMapTypeContextProvider.class, ShortCodeUssdMapTypeContextProvider.class,
-        SimpleUssdMappingContextProviderFactory.class, SimpleUssdMappingContextRegistrationFactory.class,
-        SimpleUssdStringMappingConstructor.class, SoleUssdMappingContextRegistrar.class, SimpleUssdEventRegistry.class,
-        SimpleUssdMappingRegistry.class, SimpleUssdUserSessionRegistry.class
+        SimpleApplicationStore.class,
+        UssdBasicItemStore.class,
+        DirectUssdMapTypeContextContextProvider.class,
+        GroupUssdMappingContextRegistrar.class,
+        ParamUssdMapTypeContextProvider.class,
+        ShortCodeUssdMapTypeContextProvider.class,
+        SimpleUssdMappingContextProviderFactory.class,
+        SimpleUssdMappingContextRegistrationFactory.class,
+        SimpleUssdStringMappingConstructor.class,
+        SoleUssdMappingContextRegistrar.class,
+        SimpleUssdEventRegistry.class,
+        SimpleUssdMappingRegistry.class,
+        SimpleUssdUserSessionRegistry.class
 })
 public class BankModule {
 }

@@ -10,7 +10,7 @@ import com.quantumforge.quickdial.messaging.bean.QuickDialMessageResource;
 import com.quantumforge.quickdial.messaging.builder.DocumentType;
 import com.quantumforge.quickdial.messaging.builder.MessageSourceDocumentBuilder;
 import com.quantumforge.quickdial.messaging.config.QuickDialMessageSourceConfigurationProperties;
-import com.quantumforge.quickdial.messaging.config.QuickDialMessageTemplateEngineConfig;
+import com.quantumforge.quickdial.messaging.config.QuickDialMessageTemplateEngineConfigProperties;
 import com.quantumforge.quickdial.messaging.template.NestedFileSeparator;
 import com.quantumforge.quickdial.messaging.template.engine.DefaultUssdMessageDocumentResolver;
 import com.quantumforge.quickdial.messaging.template.engine.MessageDocumentResolverBuildItem;
@@ -31,8 +31,11 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.event.EventListener;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
 import org.springframework.core.type.filter.AnnotationTypeFilter;
 import org.springframework.stereotype.Component;
+import org.springframework.util.ClassUtils;
 
 import java.io.File;
 import java.lang.reflect.Field;
@@ -43,7 +46,8 @@ import java.util.Objects;
 @Slf4j
 @Configuration
 @RequiredArgsConstructor
-@EnableConfigurationProperties(value = { QuickDialMessageSourceConfigurationProperties.class, QuickDialMessageTemplateEngineConfig.class } )
+@Order(value = Ordered.HIGHEST_PRECEDENCE)
+@EnableConfigurationProperties(value = { QuickDialMessageSourceConfigurationProperties.class, QuickDialMessageTemplateEngineConfigProperties.class } )
 public class QuickDialMessageSourceStarter{
 
     private final ApplicationStore applicationStore;
@@ -52,7 +56,7 @@ public class QuickDialMessageSourceStarter{
     private final ConfigurableApplicationContext applicationContext;
     private final List<MessageSourceDocumentBuilder> documentRegistries;
     private final QuickDialMessageSourceConfigurationProperties properties;
-    private final QuickDialMessageTemplateEngineConfig templateEngineConfig;
+    private final QuickDialMessageTemplateEngineConfigProperties templateEngineConfig;
 
     public static QuickDialMessageSourceConfigurationProperties sProperties;
 
@@ -72,7 +76,7 @@ public class QuickDialMessageSourceStarter{
                 saveMessageDocumentsToMemory(FileUtils.getFileResourcesInBaseFolder(file, resolveNestedFileSeparator(properties.getNestedFileSeparator())));
             }
         }catch (Exception exception){
-            exception.printStackTrace();
+            log.error("Exception encountered during ussd message source initialization. Exception message is: {}", exception.getMessage());
         }
     }
 
@@ -135,10 +139,7 @@ public class QuickDialMessageSourceStarter{
             scanner.addIncludeFilter(new AnnotationTypeFilter(Component.class));
             Map<String, Object> allBeans = applicationContext.getBeansOfType(Object.class);
             allBeans.forEach((beanName, beanInstance) -> {
-                String string = applicationContext.getAutowireCapableBeanFactory().getBean(beanName).getClass().getName();
-                if(string.contains(GeneralUtils.SPRING_ENHANCED_CLASS_PREFIX)) {
-                    string = GeneralUtils.cleanClassNameFromSpringEnhancerSuffix(string);
-                }
+                String string = ClassUtils.getUserClass(applicationContext.getAutowireCapableBeanFactory().getBean(beanName).getClass()).getName();
                 try {
                     Class<?> clazz = Class.forName(string);
                     Field[] fields = clazz.getDeclaredFields();
@@ -162,22 +163,25 @@ public class QuickDialMessageSourceStarter{
 
     @SneakyThrows
     private static void verboseMessageDocumentStarterLog(MessageDocuments messageDocuments){
-        System.out.println();
-        log.info("================================================= USSD MESSAGE DOCUMENTS =================================================");
-        messageDocuments.getMessageDocuments().forEach(messageDocument -> {
-            boolean isLastMessage = messageDocuments.getMessageDocuments().indexOf(messageDocument) == messageDocuments.getMessageDocuments().size() - 1;
-            log.info("File name: {}", messageDocument.getFileName());
-            log.info("Qualified file name: {}", messageDocument.getQualifiedName());
-            log.info("Number of scanned messages: {}", messageDocument.getMessages().size());
-            try{
-                log.info("Absolute file path: {}", messageDocument.getFile().getAbsolutePath());
-            }catch (Exception ignored){}
-            if(!isLastMessage){
-                log.info("--------------------------------------------------------------------------------------------------------------------------");
-            }
-        });
-        log.info("==========================================================================================================================");
-        System.out.println();
+        if(!GeneralUtils.isNullOrEmpty(messageDocuments) && !messageDocuments.getMessageDocuments().isEmpty()) {
+            System.out.println();
+            log.info("================================================= USSD MESSAGE DOCUMENTS =================================================");
+            messageDocuments.getMessageDocuments().forEach(messageDocument -> {
+                boolean isLastMessage = messageDocuments.getMessageDocuments().indexOf(messageDocument) == messageDocuments.getMessageDocuments().size() - 1;
+                log.info("File name: {}", messageDocument.getFileName());
+                log.info("Qualified file name: {}", messageDocument.getQualifiedName());
+                log.info("Number of scanned messages: {}", messageDocument.getMessages().size());
+                try {
+                    log.info("Absolute file path: {}", messageDocument.getFile().getAbsolutePath());
+                } catch (Exception ignored) {
+                }
+                if (!isLastMessage) {
+                    log.info("--------------------------------------------------------------------------------------------------------------------------");
+                }
+            });
+            log.info("==========================================================================================================================");
+            System.out.println();
+        }
     }
 
     @EventListener(value = ApplicationStartedEvent.class)
