@@ -23,8 +23,8 @@
 
 ## Overview
 <p align="justify">
-Have you ever been faced with the challenge to build a robust Ussd application? We can all testify the mess that developers can create using the traditional style of ussd application development.
-Developers on this journey usually face some (if not all) of the following challenges
+Have you ever been faced with the challenge to build a robust Ussd application? We can all testify to the mess that developers can create using the traditional style of ussd application development.
+Developers on this journey usually face some (if not all) of the following challenges:
 </p>
 
 -  Heavy use of **_if-else_** conditions and **_switch_** statements to track user sessions, inputs and navigation.
@@ -48,10 +48,10 @@ Developers on this journey usually face some (if not all) of the following chall
 - Application statistics.
 
 <p align="justify">
-If you have once developed a Ussd application, you will understand the mess you can create if you try to handle all of the above yourself. This is coupled with the fact precious development time is wasted in adjusting to new business requirements. Business would want you adjust the menus, create more menus, group menus into same context, provide automatic navigation, remove a certain menu, etc. The requirements are endless.
+If you have once developed a Ussd application, you will understand the mess you can create if you try to handle all of the above yourself. This is coupled with the fact that precious development time is wasted in adjusting to new business requirements. Business would want you adjust the menus, create more menus, group menus into same context, provide automatic navigation, remove a certain menu, etc. The requirements are endless.
 </p>
 
-**Hurray!** and welcome to **quickdial** library. This library is a Springboot starter library that provides out of box solutions to the above challenges and more!
+**Hurray!**, and welcome to **quickdial** library. This library is a Springboot starter library that provides out of box solutions to the above challenges and more!
 
 <p align="justify">
 No database configuration, no further downloads necessary, no hassle on setup, and with just adding this library as one of your dependencies, Springboot will register all of its features right into your Ussd application, leaving you write your business ussd logic straightaway without having to worry about the above challenges!
@@ -60,7 +60,7 @@ No database configuration, no further downloads necessary, no hassle on setup, a
 **quickdial** is highly configurable and the developer can specify certain behaviour of the application flow. What more? the developer can tap insights into the running application statistics!.
 
 <p align="justify">
-This documentation is a very brief descriptive summary of what the power of the <strong>quickdial</strong> library and what it can do. This documentation will be updated periodically to capture important questions raised by developers using this awesome library.
+This documentation is a very brief descriptive summary of the power of the <strong>quickdial</strong> library and what it can do. This documentation will be updated periodically to capture important questions raised by developers using this awesome library.
 </p>
 
 ## Dependency
@@ -78,13 +78,34 @@ To start, simply download the jar file from the source or add the following to y
 
 ## Ussd Architecture
 <p align="justify">
-In every Ussd application, there is primary three (4) parties involved. These individual component parties completes the entire lifecycle for every USSD request made by the user via their mobile devices.
+In every Ussd application, there are primarily four (4) parties involved. These individual component parties completes the entire lifecycle for every USSD request made by the user via their mobile devices.
 </p>
 
 The diagram below shows the summary and flow of connection and call between the individual components.
 
 
 
+
+A quick summary of the above schematic is outlined below:
+
+- **User device**: The user device is any mobile phone or any device whatsoever capable of displaying the ussd message prompted by the Network provider.
+
+
+- **Network provider**: The network provider has the closest proximity to the user. It is the network provider that displays the actual message to the user. The identity of the network provider is captured by the Ussd providers.
+
+
+- **Ussd Provider**: The ussd provider interface between the network provider and the developer's ussd application. The ussd provider make calls to the ussd application by some agreed API contract and propagates the result of the API call to the user (via the network provider).
+
+
+- **Ussd application**: This is the application service that must be developed by the developer to interface with the ussd provider. **_The developer develops the ussd application for the ussd providers_**. 
+The ussd application can consist of the following:
+
+    - UssdController: The entry point of the Ussd API contract between application and ussd provider.
+
+    - UssdService: The service layer of the ussd application. The **QuickDialPayload** should be properly built at this layer and the **QuickDialUssdExecutor** should be invoked here calling the '**submit(QuickDialPayload payload)**' method.
+
+    - MenuHandler: The menu handlers are series of classes annotated with the **@UssdMenuHandler** annotation and defines mapping for the ussd session for the user journey. Here, each ussd action is mapped to an invocable method decorated with the **@UssdSubmenuHandler** annotation.
+    
 
 ## Autoconfiguration
 <p align="justify">
@@ -602,9 +623,23 @@ The following shows the API contracts available within the <strong> quickdial </
 ```
 
 ## Best Practices
-<p>
-
+<p align="justify">
+The following are best practices that can be observed using the <strong>quickdial</strong> library.
 </p>
+
+- Ensure to deliberately remove the UssdSession of a user at the end of the user's ussd interaction. The framework manages a thread-safe concurrent registry of Users session and does series of algorithm to automatically know when to safely clear a user session from the session registry.
+However, manually clearing user's session at the end of a user ussd journey will reduce the load on the library and free up memory of the application server.
+
+
+- Store data that do not change frequently in the ApplicationStore. During data retrieval, the access is faster due to the proximity of the ApplicationStore in the application server RAM. This leads to a greater performance boost instead of lazy network calls or database lookup.
+
+
+- Keep Ussd messages as brief as possible. This is to ensure that the message is brief and concise to the user and to ensure that the Ussd Provider displays the contents of the message fully to the user. (Most Ussd provider have a maximum length of character that can be displaced on the user device)
+
+
+- Separate menu handling logic from ussd messages. As much as possible, use the XML based messaging format.
+
+
 
 ## Examples with Africa-Is-Talking
 <p>
