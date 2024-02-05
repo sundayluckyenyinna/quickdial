@@ -149,12 +149,12 @@ Below outlines each fields of the QuickDialPayload.
 ## Ussd mapping
 <p align="justify">
 The philosophy of the quickdial library is very similar to the philosophy of springboot request handling. Every possible ussd operation initiated by user actions are mapped into ussd menu handlers. In the most basic form, a menu can be represented as a class while submenus will simply be methods in the class.
-Annotations are used to specify the menu codes as well as the submenu codes of the ussd action. The following snapshot shows a simple menu with 3 submenu.
+Annotations are used to specify the menu codes as well as the submenu codes of the ussd action.
 
-![ussd_message.png](ussd_message.png)
+Now suppose that we intend to map a ussd session for user for account creation, we can create a class called **TestMenuHandler** for example, and then create the three(3) submenus in the methods to simulate the account creation (with BVN or without BVN).
+The following code snippets shows how the mapping is done in a very simple way.
 
-From the above, the menu is of number 1 (i.e menu item 1) and has three submenus.
-Now suppose that we intend to map this relationship, we can create a class called **TestMenuHandler** for example, and then create the three(3) submenus in the methods.
+<strong>NOTE:</strong> The developer can explore very complex ussd mapping technique in the library. However, the documentation will be updated over time to accommodate and entertain questions.
 </p>
 
 ```java
