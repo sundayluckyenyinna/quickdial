@@ -151,6 +151,8 @@ Below outlines each fields of the QuickDialPayload.
 The philosophy of the quickdial library is very similar to the philosophy of springboot request handling. Every possible ussd operation initiated by user actions are mapped into ussd menu handlers. In the most basic form, a menu can be represented as a class while submenus will simply be methods in the class.
 Annotations are used to specify the menu codes as well as the submenu codes of the ussd action. The following snapshot shows a simple menu with 3 submenu.
 
+![ussd_message.png](ussd_message.png)
+
 From the above, the menu is of number 1 (i.e menu item 1) and has three submenus.
 Now suppose that we intend to map this relationship, we can create a class called **TestMenuHandler** for example, and then create the three(3) submenus in the methods.
 </p>
