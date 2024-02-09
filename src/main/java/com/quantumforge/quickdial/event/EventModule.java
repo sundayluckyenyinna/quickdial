@@ -10,4 +10,5 @@ import org.springframework.context.annotation.Import;
         UssdEventPublisher.class
 })
 public class EventModule {
+
 }

@@ -30,7 +30,7 @@ public class SimpleApplicationStore implements ApplicationStore{
 
     @Override
     public <T> T getItem(String key, Class<T> tClass){
-        return tClass.cast(getItem(key));
+        return Objects.nonNull(getItem(key)) ? tClass.cast(getItem(key)) : null;
     }
 
     @Override

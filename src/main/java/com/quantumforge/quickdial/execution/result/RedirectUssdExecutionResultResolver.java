@@ -19,7 +19,7 @@ public class RedirectUssdExecutionResultResolver implements UssdExecutionResultR
     private final ClassToMethodReferenceResolverUtils referenceResolverUtils;
 
     @Override
-    public Object getResolvedUssdBody(UssdExecution<?> execution, UssdSession session) {
+    public UssdExecution<?> getResolvedUssdBody(UssdExecution<?> execution, UssdSession session) {
         String redirectUssdPageId = execution.getRedirectUssdPageId();
         redirectUssdPageId = referenceResolverUtils.resolveUssdContextIdFromRedirectionRule(redirectUssdPageId, execution.getCurrentCallableClass());
         UssdUserExecutionContext ussdUserExecutionContext = session.getUssdUserExecutionContextByContextId(redirectUssdPageId);

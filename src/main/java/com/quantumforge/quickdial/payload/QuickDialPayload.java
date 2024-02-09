@@ -5,6 +5,9 @@ import com.quantumforge.quickdial.execution.provider.UssdInvocationType;
 import lombok.*;
 
 @Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public final class QuickDialPayload {
     private String sessionId;
     private String msisdn;

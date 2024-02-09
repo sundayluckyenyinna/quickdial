@@ -29,7 +29,7 @@ public final class UssdExecution<T> {
     @Setter
     private Class<?> currentCallableClass;
 
-    private UssdExecution(){}
+    public UssdExecution(){}
 
     public static <T> UssdExecution<T> redirect(String ussdPageId){
         UssdExecution<T> ussdExecution = new UssdExecution<>();

@@ -9,6 +9,7 @@ import org.springframework.context.event.EventListener;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Objects;
 
 @Slf4j
 @Configuration
@@ -20,6 +21,10 @@ public class UssdBasicItemStore {
 
     public Object getItem(ApplicationItem item){
         return USSD_ITEM_STORE.get(item);
+    }
+    public <T> T getItem(ApplicationItem item, Class<T> tClass){
+        Object value = getItem(item);
+        return Objects.nonNull(value) ? tClass.cast(value) : null;
     }
 
     private void setItem(ApplicationItem item, Object itemValue){

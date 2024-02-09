@@ -29,4 +29,5 @@ import org.springframework.context.annotation.Import;
         UtilModule.class
 })
 public class QuickDialConfigurationEntryPoint {
+
 }

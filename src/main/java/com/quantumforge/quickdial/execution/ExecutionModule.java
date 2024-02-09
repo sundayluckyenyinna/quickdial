@@ -2,6 +2,7 @@ package com.quantumforge.quickdial.execution;
 
 import com.quantumforge.quickdial.execution.provider.DefaultUssdUserExecutionContextParameterProvider;
 import com.quantumforge.quickdial.execution.result.ClassToMethodReferenceResolverUtils;
+import com.quantumforge.quickdial.execution.result.ContinueUssdExecutionResultResolver;
 import com.quantumforge.quickdial.execution.result.EndUssdExecutionResultResolver;
 import com.quantumforge.quickdial.execution.result.RedirectUssdExecutionResultResolver;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
@@ -13,6 +14,7 @@ import org.springframework.context.annotation.Import;
 @Import(value = {
         DefaultUssdUserExecutionContextParameterProvider.class,
         ClassToMethodReferenceResolverUtils.class,
+        ContinueUssdExecutionResultResolver.class,
         EndUssdExecutionResultResolver.class,
         RedirectUssdExecutionResultResolver.class,
         DefaultUssdExecutor.class,

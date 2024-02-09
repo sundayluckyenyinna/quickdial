@@ -5,6 +5,6 @@ import com.quantumforge.quickdial.session.UssdSession;
 
 public interface UssdExecutionResultResolver {
 
-    Object getResolvedUssdBody(UssdExecution<?> execution, UssdSession session);
+    UssdExecution<?> getResolvedUssdBody(UssdExecution<?> execution, UssdSession session);
     boolean supportsState(UssdExecution.MenuReturnState returnState);
 }

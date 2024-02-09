@@ -15,9 +15,9 @@ public class EndUssdExecutionResultResolver implements UssdExecutionResultResolv
     private final UssdUserSessionRegistry sessionRegistry;
 
     @Override
-    public Object getResolvedUssdBody(UssdExecution<?> execution, UssdSession session) {
+    public UssdExecution<?> getResolvedUssdBody(UssdExecution<?> execution, UssdSession session) {
         sessionRegistry.invalidateSession(session);
-        return execution.getBody();
+        return execution;
     }
 
     @Override

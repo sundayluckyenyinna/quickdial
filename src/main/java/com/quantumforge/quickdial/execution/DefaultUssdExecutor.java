@@ -5,9 +5,11 @@ import com.quantumforge.quickdial.context.UssdUserExecutionContext;
 import com.quantumforge.quickdial.execution.provider.UssdUserExecutionContextParameterProvider;
 import com.quantumforge.quickdial.execution.provider.UssdUserExecutionParameter;
 import com.quantumforge.quickdial.payload.QuickDialPayload;
+import com.quantumforge.quickdial.payload.UssdExecution;
 import com.quantumforge.quickdial.session.UssdSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeanUtils;
 import org.springframework.context.annotation.Configuration;
 
 @Slf4j
@@ -19,12 +21,19 @@ public class DefaultUssdExecutor implements QuickDialUssdExecutor{
     private final UssdUserExecutionContextParameterProvider contextParameterProvider;
 
     @Override
-    @SuppressWarnings("unchecked")
-    public <T> T submit(QuickDialPayload quickDialPayload){
+    public UssdExecution<?> submit(QuickDialPayload quickDialPayload){
         UssdUserExecutionParameter executionParameter = contextParameterProvider.provideParameter(quickDialPayload);
         UssdSession session = sessionRegistry.getSession(executionParameter.getSessionId());
         UssdUserExecutionContext ussdUserExecutionContext = executionParameter.getFinalUssdUserExecutionContext();
-        Object invocationResult = UssdExecutionReflectionInvocationUtils.invokeUssdExecutionForSession(ussdUserExecutionContext, session);
-        return (T) invocationResult;
+        return UssdExecutionReflectionInvocationUtils.invokeUssdExecutionForSession(ussdUserExecutionContext, session);
+    }
+
+    @Override
+    public <T> UssdExecution<T> submit(QuickDialPayload quickDialPayload, Class<T> tClass){
+        UssdExecution<?> execution = submit(quickDialPayload);
+        UssdExecution<T> ussdExecution = new UssdExecution<>();
+        BeanUtils.copyProperties(execution, ussdExecution);
+        ussdExecution.setBody(tClass.cast(execution.getBody()));
+        return ussdExecution;
     }
 }

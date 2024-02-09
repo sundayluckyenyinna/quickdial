@@ -150,7 +150,7 @@ public class SimpleUssdMappingRegistry implements UssdMappingRegistry {
         if(ussdConfigProperties.isEnableVerboseMappingLogs() && !USSD_EXECUTION_CONTEXTS.isEmpty()) {
             System.out.println();
             log.info("============================================= USSD EXECUTION CONTEXT MAPPINGS =============================================");
-            USSD_EXECUTION_CONTEXTS.stream().sorted(Comparator.comparingInt(UssdExecutable::mappingLength)).forEach(ussdExecutable -> {
+            USSD_EXECUTION_CONTEXTS.stream().sorted((a, b) -> b.mappingLength() - a.mappingLength()).forEach(ussdExecutable -> {
                 boolean isLastMessage = USSD_EXECUTION_CONTEXTS.indexOf(ussdExecutable) == USSD_EXECUTION_CONTEXTS.size() - 1;
                 if(ussdExecutable instanceof SoleUssdExecutionContextWrapper soleUssdExecutionContextWrapper){
                     UssdExecutionContext executionContext = soleUssdExecutionContextWrapper.getUssdExecutionContext();

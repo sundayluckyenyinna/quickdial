@@ -10,8 +10,8 @@ import org.springframework.context.annotation.Configuration;
 public class ContinueUssdExecutionResultResolver implements UssdExecutionResultResolver{
 
     @Override
-    public Object getResolvedUssdBody(UssdExecution<?> execution, UssdSession session) {
-        return execution.getBody();
+    public UssdExecution<?> getResolvedUssdBody(UssdExecution<?> execution, UssdSession session) {
+        return execution;
     }
 
     @Override

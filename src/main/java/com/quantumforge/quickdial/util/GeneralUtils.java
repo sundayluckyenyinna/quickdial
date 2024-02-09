@@ -2,6 +2,7 @@ package com.quantumforge.quickdial.util;
 
 import com.quantumforge.quickdial.common.StringValues;
 
+import java.util.Collections;
 import java.util.Objects;
 import java.util.regex.Pattern;
 

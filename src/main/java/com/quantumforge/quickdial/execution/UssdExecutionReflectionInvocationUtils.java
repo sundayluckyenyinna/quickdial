@@ -43,7 +43,7 @@ public class UssdExecutionReflectionInvocationUtils {
         return StringValues.BEAN_CREATION_SUCCESS;
     }
 
-    public static Object invokeUssdExecutionForSession(UssdUserExecutionContext ussdUserExecutionContext, UssdSession session){
+    public static UssdExecution<?> invokeUssdExecutionForSession(UssdUserExecutionContext ussdUserExecutionContext, UssdSession session){
         String ussdMapping = ussdUserExecutionContext.getExecutionContext().getUssdMapping(); // this might contain registered mappings
         String contextData = ussdUserExecutionContext.getContextData();  // this contains raw data
         String msisdn = ussdUserExecutionContext.getMsisdn();
@@ -75,7 +75,7 @@ public class UssdExecutionReflectionInvocationUtils {
     }
 
     private static UssdExecutionResultResolver getSupportingResultResolver(UssdExecution.MenuReturnState menuReturnState){
-         return executionResultResolvers
+        return executionResultResolvers
                  .stream().filter(ussdExecutionResultResolver -> ussdExecutionResultResolver.supportsState(menuReturnState))
                  .findFirst()
                  .orElseThrow(() -> new UssdExecutionResolverNotFoundException("Could not find Ussd execution result resolver"));

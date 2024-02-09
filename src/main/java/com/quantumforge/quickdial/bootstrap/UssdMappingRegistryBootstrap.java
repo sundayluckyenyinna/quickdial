@@ -20,6 +20,7 @@ import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Configuration
@@ -35,12 +36,10 @@ public class UssdMappingRegistryBootstrap {
     @Bean
     public String initUssdMappingRegistration(){
         Map<String, Object> beansWithAnnotation = applicationContext.getBeansWithAnnotation(UssdMenuHandler.class);
-
         for(Map.Entry<String, Object> entry : beansWithAnnotation.entrySet()) {
             String beanName = entry.getKey();
             Object callableObjectInstance = entry.getValue();
             Class<?> beanClass = ClassUtils.getUserClass(applicationContext.getBean(beanName).getClass());
-
             List<Method> subHandlerMethods = Arrays.stream(beanClass.getMethods())
                     .peek(method -> method.setAccessible(true))
                     .filter(method -> method.isAnnotationPresent(UssdSubMenuHandler.class))
