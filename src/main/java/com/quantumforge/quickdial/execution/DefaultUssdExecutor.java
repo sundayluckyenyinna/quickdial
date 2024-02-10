@@ -29,11 +29,9 @@ public class DefaultUssdExecutor implements QuickDialUssdExecutor{
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public <T> UssdExecution<T> submit(QuickDialPayload quickDialPayload, Class<T> tClass){
         UssdExecution<?> execution = submit(quickDialPayload);
-        UssdExecution<T> ussdExecution = new UssdExecution<>();
-        BeanUtils.copyProperties(execution, ussdExecution);
-        ussdExecution.setBody(tClass.cast(execution.getBody()));
-        return ussdExecution;
+        return (UssdExecution<T>) execution;
     }
 }

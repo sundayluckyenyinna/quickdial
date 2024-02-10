@@ -4,28 +4,24 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
+@Getter
 @ToString
 public final class UssdExecution<T> {
-    private boolean isRedirect = false;
-    private boolean isContinue = false;
-    private boolean isEnd = false;
-    @Getter
+    private boolean shouldRedirect = false;
+    private boolean shouldContinue = false;
+    private boolean shouldEnd = false;
     @Setter
     private T body;
 
-    @Getter
     @Setter
     private MenuReturnState returnState = MenuReturnState.CONTINUE;
 
-    @Getter
     @Setter
     private String redirectUssdPageId;
 
-    @Getter
     @Setter
     private String redirectUssdPageInput;
 
-    @Getter
     @Setter
     private Class<?> currentCallableClass;
 
@@ -33,7 +29,7 @@ public final class UssdExecution<T> {
 
     public static <T> UssdExecution<T> redirect(String ussdPageId){
         UssdExecution<T> ussdExecution = new UssdExecution<>();
-        ussdExecution.isRedirect = true;
+        ussdExecution.shouldRedirect = true;
         ussdExecution.body = null;
         ussdExecution.returnState = MenuReturnState.REDIRECT;
         ussdExecution.redirectUssdPageId = ussdPageId;
@@ -43,7 +39,7 @@ public final class UssdExecution<T> {
 
     public static <T> UssdExecution<T> redirect(String ussdPageId, String input){
         UssdExecution<T> ussdExecution = new UssdExecution<>();
-        ussdExecution.isRedirect = true;
+        ussdExecution.shouldRedirect = true;
         ussdExecution.body = null;
         ussdExecution.returnState = MenuReturnState.REDIRECT;
         ussdExecution.redirectUssdPageId = ussdPageId;
@@ -53,7 +49,7 @@ public final class UssdExecution<T> {
 
     public static <T> UssdExecution<T> continues(T body){
         UssdExecution<T> ussdExecution = new UssdExecution<>();
-        ussdExecution.isContinue = true;
+        ussdExecution.shouldContinue = true;
         ussdExecution.body = body;
         ussdExecution.returnState = MenuReturnState.CONTINUE;
         return ussdExecution;
@@ -61,22 +57,10 @@ public final class UssdExecution<T> {
 
     public static <T> UssdExecution<T> end(T body){
         UssdExecution<T> ussdExecution = new UssdExecution<>();
-        ussdExecution.isEnd = true;
+        ussdExecution.shouldEnd = true;
         ussdExecution.body = body;
         ussdExecution.returnState = MenuReturnState.END;
         return ussdExecution;
-    }
-
-    public boolean isRedirect(){
-        return this.isRedirect;
-    }
-
-    public boolean isContinue(){
-        return this.isContinue;
-    }
-
-    public boolean isEnd(){
-        return this.isEnd;
     }
 
     public enum MenuReturnState{
