@@ -55,8 +55,8 @@ public class UssdEventPublisher {
         staticPublishEvent(sessionPreDestroyedEvent);
     }
 
-    public static void publishSessionPostDestroyedEvent(){
-        UssdUserSessionPostDestroyedEvent sessionPostDestroyedEvent = new UssdUserSessionPostDestroyedEvent();
+    public static void publishSessionPostDestroyedEvent(UssdSession session){
+        UssdUserSessionPostDestroyedEvent sessionPostDestroyedEvent = new UssdUserSessionPostDestroyedEvent(session);
         staticPublishEvent(sessionPostDestroyedEvent);
     }
 

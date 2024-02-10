@@ -42,7 +42,7 @@ public class DefaultOptionCheckInterceptor implements UssdInputValidationInterce
         UssdUserExecutionContext currentContext = ussdSession.getExecutionContextChain().getCurrentElement();
         if(Objects.nonNull(currentContext) && !currentContext.isRelaxMenuOptionCheck() && ussdConfigProperties.isEnableMenuOptionCheck()){
             Message message = currentContext.getResultingMessage();
-            if(Objects.nonNull(message) && !isSpecialInput(incomingInput)) {
+            if(Objects.nonNull(message) && isNotSpecialInput(incomingInput)) {
                 List<String> optionsInMessage = getOptionsInMessage(message);
                 if (Objects.nonNull(incomingInput) && !optionsInMessage.isEmpty() && !optionsInMessage.contains(incomingInput)) {
                     int trialTimes = getTrialTimes(ussdSession);
@@ -104,6 +104,7 @@ public class DefaultOptionCheckInterceptor implements UssdInputValidationInterce
                 .stream()
                 .map(MessageLine::getOption)
                 .filter(option -> Objects.nonNull(option) && !option.trim().isEmpty())
+                .filter(this::isNotSpecialInput)
                 .map(option -> {
                     if(option.endsWith(StringValues.DOT)){
                         return option.substring(0, option.lastIndexOf(StringValues.DOT));
@@ -112,8 +113,8 @@ public class DefaultOptionCheckInterceptor implements UssdInputValidationInterce
                 }).collect(Collectors.toList());
     }
 
-    private boolean isSpecialInput(String input){
-        return Arrays.asList(ussdConfigProperties.getGoBackOption(), ussdConfigProperties.getGoForwardOption()).contains(input);
+    private boolean isNotSpecialInput(String input){
+        return !Arrays.asList(ussdConfigProperties.getGoBackOption(), ussdConfigProperties.getGoForwardOption()).contains(input);
     }
 
     private int getTrialTimes(UssdSession ussdSession){

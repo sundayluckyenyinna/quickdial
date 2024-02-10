@@ -32,9 +32,6 @@ import static com.quantumforge.quickdial.messaging.config.QuickDialMessageSource
 @EnableConfigurationProperties(value = {UssdRedirectConfigProperties.class})
 public class XmlUssdMessageSourceDocumentBuilder implements MessageSourceDocumentBuilder {
 
-    String THYMELEAF_AUTOMATIC_ERROR_LINE_TEMPLATE = "<line th:if=\"${isRedirectForOptionValidationError}\">%s</line>";
-    String FREEMARKER_AUTOMATIC_ERROR_LINE_TEMPLATE = "<line><#if isRedirectForOptionValidationError>%s</#if></line>";
-
     private final QuickDialMessageTemplateEngineConfigProperties templateEngineConfigProperties;
     private final UssdRedirectConfigProperties redirectConfigProperties;
 

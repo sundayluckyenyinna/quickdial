@@ -8,6 +8,9 @@ import java.util.List;
 
 public interface MessageSourceDocumentBuilder {
 
+    String THYMELEAF_AUTOMATIC_ERROR_LINE_TEMPLATE = "<line th:if=\"${isRedirectForOptionValidationError}\">%s</line>";
+    String FREEMARKER_AUTOMATIC_ERROR_LINE_TEMPLATE = "<line><#if isRedirectForOptionValidationError>%s</#if></line>";
+
     boolean supportsDocumentType(DocumentType documentType);
     MessageDocument buildDocument(FileResource fileResources);
 

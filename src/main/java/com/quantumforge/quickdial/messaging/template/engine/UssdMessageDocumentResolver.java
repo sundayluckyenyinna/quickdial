@@ -5,13 +5,9 @@ import com.quantumforge.quickdial.session.UssdSession;
 import lombok.NonNull;
 
 public interface UssdMessageDocumentResolver {
-    UssdMessageDocumentResolver withModel(UssdModel ussdModel);
+    ModelUssdMessageResolver withModel(UssdModel ussdModel);
 
-    UssdMessageDocumentResolver withSessionId(String sessionId);
+    ModelUssdMessageResolver withSessionId(String sessionId);
 
-    UssdMessageDocumentResolver withSession(@NonNull UssdSession session);
-
-    String getResolvedMessageById(String messageId);
-
-    String getResolvedMessageById(String messageId, String separator);
+    ModelUssdMessageResolver withSession(@NonNull UssdSession session);
 }

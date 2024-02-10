@@ -52,8 +52,8 @@ public class SimpleUssdUserSessionRegistry implements UssdUserSessionRegistry {
         UssdSession sessionToBeInvalidated = getSession(sessionId, false);
         if(!Objects.isNull(sessionToBeInvalidated)){
             UssdEventPublisher.publishSessionPreDestroyedEvent(sessionToBeInvalidated);
-            SESSION_REGISTRY_LOG.remove(sessionId);
-            UssdEventPublisher.publishSessionPostDestroyedEvent();
+            UssdSession removedSession = SESSION_REGISTRY_LOG.remove(sessionId);
+            UssdEventPublisher.publishSessionPostDestroyedEvent(removedSession);
         }
     }
 

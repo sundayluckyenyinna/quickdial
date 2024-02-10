@@ -5,7 +5,7 @@ import lombok.Getter;
 
 @Getter
 public class UssdUserSessionPostDestroyedEvent extends UssdApplicationEvent {
-    public UssdUserSessionPostDestroyedEvent() {
-        super(new UssdSession());
+    public UssdUserSessionPostDestroyedEvent(UssdSession session) {
+        super(session);
     }
 }

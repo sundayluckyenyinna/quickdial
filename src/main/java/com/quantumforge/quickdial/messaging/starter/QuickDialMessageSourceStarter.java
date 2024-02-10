@@ -3,6 +3,7 @@ package com.quantumforge.quickdial.messaging.starter;
 import com.quantumforge.quickdial.annotation.InjectDocument;
 import com.quantumforge.quickdial.bank.global.ApplicationItem;
 import com.quantumforge.quickdial.bank.global.ApplicationStore;
+import com.quantumforge.quickdial.bank.global.UssdBasicItemStore;
 import com.quantumforge.quickdial.common.StringValues;
 import com.quantumforge.quickdial.event.UssdEventPublisher;
 import com.quantumforge.quickdial.exception.UnsupportedUssdMessageDocumentSourceException;
@@ -53,6 +54,7 @@ import java.util.stream.Collectors;
 public class QuickDialMessageSourceStarter{
 
     private final ApplicationStore applicationStore;
+    private final UssdBasicItemStore ussdBasicItemStore;
     private final TemplateResolverRouter templateResolverRouter;
     private final QuickDialMessageResource quickDialMessageResource;
     private final ConfigurableApplicationContext applicationContext;
@@ -105,6 +107,7 @@ public class QuickDialMessageSourceStarter{
                     .preferredEngine(templateEngineConfig.getPreferredEngine())
                     .templateResolverRouter(templateResolverRouter)
                     .messageDocument(messageDocument)
+                    .ussdBasicItemStore(ussdBasicItemStore)
                     .build();
             UssdMessageDocumentResolver documentResolver = new DefaultUssdMessageDocumentResolver(buildItem);
             applicationContext.getBeanFactory().registerSingleton(beanName, documentResolver);
