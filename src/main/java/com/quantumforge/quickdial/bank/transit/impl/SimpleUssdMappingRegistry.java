@@ -19,6 +19,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.event.EventListener;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
 
@@ -150,8 +151,8 @@ public class SimpleUssdMappingRegistry implements UssdMappingRegistry {
         if(ussdConfigProperties.isEnableVerboseMappingLogs() && !USSD_EXECUTION_CONTEXTS.isEmpty()) {
             System.out.println();
             log.info("============================================= USSD EXECUTION CONTEXT MAPPINGS =============================================");
-            USSD_EXECUTION_CONTEXTS.stream().sorted((a, b) -> b.mappingLength() - a.mappingLength()).forEach(ussdExecutable -> {
-                boolean isLastMessage = USSD_EXECUTION_CONTEXTS.indexOf(ussdExecutable) == USSD_EXECUTION_CONTEXTS.size() - 1;
+            AtomicInteger atomicInteger = new AtomicInteger(0);
+            USSD_EXECUTION_CONTEXTS.stream().sorted(Comparator.comparingInt(UssdExecutable::mappingLength)).forEach(ussdExecutable -> {
                 if(ussdExecutable instanceof SoleUssdExecutionContextWrapper soleUssdExecutionContextWrapper){
                     UssdExecutionContext executionContext = soleUssdExecutionContextWrapper.getUssdExecutionContext();
                     logUssdExecutionContext(executionContext);
@@ -167,7 +168,7 @@ public class SimpleUssdMappingRegistry implements UssdMappingRegistry {
                     log.info("             _______________________________________________________________________");
                     log.info("");
                 }
-                if (!isLastMessage) {
+                if (atomicInteger.incrementAndGet() < USSD_EXECUTION_CONTEXTS.size()) {
                     log.info("--------------------------------------------------------------------------------------------------------------------------");
                 }
             });

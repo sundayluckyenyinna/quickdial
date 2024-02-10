@@ -17,8 +17,9 @@ public class UssdModel {
 
     private final Map<String, Object> USSD_MODEL_REPO = new ConcurrentHashMap<>();
 
-    public void addObject(String key, Object attr){
+    public UssdModel addObject(String key, Object attr){
         addOrThrowException(key, attr);
+        return this;
     }
 
     public Object getObject(String key){

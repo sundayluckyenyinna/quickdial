@@ -44,7 +44,7 @@ public class DefaultOptionCheckInterceptor implements UssdInputValidationInterce
             Message message = currentContext.getResultingMessage();
             if(Objects.nonNull(message) && !isSpecialInput(incomingInput)) {
                 List<String> optionsInMessage = getOptionsInMessage(message);
-                if (Objects.nonNull(incomingInput) && !optionsInMessage.contains(incomingInput)) {
+                if (Objects.nonNull(incomingInput) && !optionsInMessage.isEmpty() && !optionsInMessage.contains(incomingInput)) {
                     int trialTimes = getTrialTimes(ussdSession);
                     if (trialTimes <= maximumRetryTimes) {  // retry same page for user
                         result.setIntercepted(true);
@@ -69,7 +69,8 @@ public class DefaultOptionCheckInterceptor implements UssdInputValidationInterce
             }else{
                 updateShowErrorMessageCommand(userUssdModel, false, maximumRetryTimes);
             }
-        }else{
+        }
+        else{
             updateShowErrorMessageCommand(userUssdModel, false, maximumRetryTimes);
         }
         return result;

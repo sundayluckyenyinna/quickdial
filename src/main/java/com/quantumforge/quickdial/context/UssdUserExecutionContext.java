@@ -45,7 +45,7 @@ public class UssdUserExecutionContext {
 
     public boolean isRelaxMenuOptionCheck(){
         UssdSubMenuHandler subMenuHandler = getExecutionContext().getUssdSubMenuHandler();
-        return Objects.nonNull(subMenuHandler) && subMenuHandler.relaxBackwardNavigation();
+        return Objects.nonNull(subMenuHandler) && subMenuHandler.relaxMenuOptionCheck();
     }
 
     public void updateInputAndCorrespondingContextData(String input){
