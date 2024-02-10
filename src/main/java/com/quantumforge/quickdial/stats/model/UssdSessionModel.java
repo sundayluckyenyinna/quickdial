@@ -19,6 +19,6 @@ public class UssdSessionModel {
     private BackwardNavigableList<UssdUserExecutionContextModel> executionContextChain = new BackwardNavigableList<>();
     private Map<String, Object> sessionData = new LinkedHashMap<>();
     private Map<String, Object> ussdModel = new LinkedHashMap<>();
-    private LocalDateTime createdAt;
+    private String createdAt;
     private boolean isFresh;
 }

@@ -107,7 +107,7 @@ public class StatisticsRestService implements IStatisticsRestService{
                 .ussdModel(session.getUssdModel().getModelMap())
                 .sessionId(session.getSessionId())
                 .executionContextChain(new BackwardNavigableList<>(ussdUserExecutionContextModels))
-                .createdAt(session.getCreatedAt())
+                .createdAt(session.getCreatedAt().toString())
                 .isFresh(session.isFresh())
                 .build();
     }
