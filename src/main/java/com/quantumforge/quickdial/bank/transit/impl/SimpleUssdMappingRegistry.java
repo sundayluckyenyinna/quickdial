@@ -137,13 +137,34 @@ public class SimpleUssdMappingRegistry implements UssdMappingRegistry {
             boolean isOneOfThemParameterized = quickDialUtil.isParamMapping(incomingContext.getUssdMapping()) || quickDialUtil.isParamMapping(matchingContext.getUssdMapping());
             boolean isExactlySame = incomingContext.getUssdMapping().equalsIgnoreCase(matchingContext.getUssdMapping());
             if(isOneOfThemParameterized || isExactlySame) {
-                String inClass = incomingContext.getCallableClass().getName();
-                String inMethod = incomingContext.getInvocableMethod().getName();
-                String matClass = matchingContext.getCallableClass().getName();
-                String matMethod = matchingContext.getInvocableMethod().getName();
-                throw new AmbiguousUssdMappingException(String.format("Ambiguous mapping for ussd mapping %s defined on method '%s' in class '%s'. A similar mapping of %s was found on method '%s' in class '%s'", incomingContext.getUssdMapping(), inMethod, inClass, matchingContext.getUssdMapping(), matMethod, matClass));
+                if(isAmbiguousForTwoMapping(incomingContext.getUssdMapping(), matchingContext.getUssdMapping())) {
+                    String inClass = incomingContext.getCallableClass().getName();
+                    String inMethod = incomingContext.getInvocableMethod().getName();
+                    String matClass = matchingContext.getCallableClass().getName();
+                    String matMethod = matchingContext.getInvocableMethod().getName();
+                    throw new AmbiguousUssdMappingException(String.format("Ambiguous mapping for ussd mapping %s defined on method '%s' in class '%s'. A similar mapping of %s was found on method '%s' in class '%s'", incomingContext.getUssdMapping(), inMethod, inClass, matchingContext.getUssdMapping(), matMethod, matClass));
+                }
             }
         }
+    }
+
+    private boolean isAmbiguousForTwoMapping(String firstMapping, String secondMapping){
+        List<String> firstTokens = quickDialUtil.getTokensBetweenDelimiters(firstMapping);
+        List<String> secondTokens = quickDialUtil.getTokensBetweenDelimiters(secondMapping);
+        boolean isAmbiguous = false;
+        for(int i = 0; i < firstTokens.size(); i++){
+            String currentFirstToken = firstTokens.get(i);
+            String currentSecondToken = secondTokens.get(i);
+            if(quickDialUtil.isParamMapping(currentFirstToken) && quickDialUtil.isDirectMapping(currentSecondToken)){
+                isAmbiguous = true;
+                break;
+            }
+            if(quickDialUtil.isDirectMapping(currentFirstToken) && quickDialUtil.isParamMapping(currentSecondToken)){
+                isAmbiguous = true;
+                break;
+            }
+        }
+        return isAmbiguous;
     }
 
     @EventListener(value = ApplicationStartedEvent.class)

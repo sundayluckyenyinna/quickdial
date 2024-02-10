@@ -26,7 +26,7 @@ public class QuickDialMessageSourceConfig {
 
     @Bean
     @ConditionalOnMissingBean
-    public QuickDialMessageResource defaultQuickDialMessageResource() throws IOException {
+    public QuickDialMessageResource defaultQuickDialMessageResource() {
         try {
             if (!GeneralUtils.isNullOrEmpty(properties.getTemplatePath())) {
                 return QuickDialMessageResource.builder()
