@@ -14,5 +14,7 @@ public @interface UssdSubMenuHandler {
     boolean relaxBackwardNavigation() default false;
     boolean relaxMenuOptionCheck() default false;
     boolean hideNavigationOptions() default false;
+    boolean hideBackwardNavOption() default false;
+    boolean hideForwardNavOption() default false;
     int navOptionTopPadding() default 1;
 }

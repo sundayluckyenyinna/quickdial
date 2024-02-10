@@ -88,14 +88,16 @@ public final class ModelUssdMessageResolver{
                     UssdExecutionContext ussdExecutionContext = ussdUserExecutionContext.getExecutionContext();
                     UssdSubMenuHandler subMenuHandler = ussdExecutionContext.getUssdSubMenuHandler();
                     if(!GeneralUtils.isNullOrEmpty(subMenuHandler) && !subMenuHandler.hideNavigationOptions()){
-                        for(int i = 0; i < subMenuHandler.navOptionTopPadding(); i++){
-                            MessageLine emptyLine = new MessageLine();
-                            emptyLine.getAttributes().put(XML_MESSAGE_OPTION, StringValues.EMPTY_STRING);
-                            emptyLine.setText(StringValues.EMPTY_STRING);
-                            message.getLines().add(emptyLine);
+                        if(!subMenuHandler.hideBackwardNavOption() || !subMenuHandler.hideForwardNavOption()) {
+                            for (int i = 0; i < subMenuHandler.navOptionTopPadding(); i++) {
+                                MessageLine emptyLine = new MessageLine();
+                                emptyLine.getAttributes().put(XML_MESSAGE_OPTION, StringValues.EMPTY_STRING);
+                                emptyLine.setText(StringValues.EMPTY_STRING);
+                                message.getLines().add(emptyLine);
+                            }
+                            GeneralUtils.doIf(!subMenuHandler.hideBackwardNavOption(), () -> configureGoBackNavOption(message));
+                            GeneralUtils.doIf(!subMenuHandler.hideForwardNavOption(), () -> configureGoForwardNavOption(message));
                         }
-                        configureGoBackNavOption(message);
-                        configureGoForwardNavOption(message);
                     }
                 }
             }
