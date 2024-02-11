@@ -2,6 +2,7 @@ package com.quantumforge.quickdial.event;
 
 import com.quantumforge.quickdial.common.StringValues;
 import com.quantumforge.quickdial.context.UssdExecutable;
+import com.quantumforge.quickdial.messaging.template.strut.Message;
 import com.quantumforge.quickdial.messaging.template.strut.MessageDocuments;
 import com.quantumforge.quickdial.session.UssdSession;
 import com.quantumforge.quickdial.util.GeneralUtils;
@@ -66,6 +67,11 @@ public class UssdEventPublisher {
             UssdMessageDocumentContainerInitializedEvent documentContainerInitializedEvent = new UssdMessageDocumentContainerInitializedEvent(messageDocuments);
             staticPublishEvent(documentContainerInitializedEvent);
         }
+    }
+
+    public static void publishUserSessionMessageUpdatedEvent(UssdSession session, Message message){
+        UssdUserSessionWithMessageUpdatedEvent event = new UssdUserSessionWithMessageUpdatedEvent(session, message);
+        staticPublishEvent(event);
     }
 
     // USSD-MAPPING

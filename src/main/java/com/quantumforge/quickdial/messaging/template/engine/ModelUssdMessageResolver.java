@@ -6,6 +6,7 @@ import com.quantumforge.quickdial.bank.global.UssdBasicItemStore;
 import com.quantumforge.quickdial.common.StringValues;
 import com.quantumforge.quickdial.context.UssdExecutionContext;
 import com.quantumforge.quickdial.context.UssdUserExecutionContext;
+import com.quantumforge.quickdial.event.UssdEventPublisher;
 import com.quantumforge.quickdial.exception.TemplateParsingException;
 import com.quantumforge.quickdial.exception.UssdMessageNotFoundException;
 import com.quantumforge.quickdial.interceptor.UssdInputValidationInterceptor;
@@ -75,7 +76,10 @@ public final class ModelUssdMessageResolver{
         OptionLineWriter optionLineWriter = OptionLineWriter.start();
         cleanedMessage.getLines().forEach(messageLine -> optionLineWriter.addLine(messageLine.getOption(), messageLine.getText(), separator));
         String rawMsgText = optionLineWriter.join();
-        GeneralUtils.doIf(Objects.nonNull(ussdModel.getOwnSession()), () -> ussdModel.getOwnSession().getExecutionContextChain().getCurrentElement().setResultingMessage(cleanedMessage));
+        GeneralUtils.doIf(Objects.nonNull(ussdModel.getOwnSession()), () -> {
+            ussdModel.getOwnSession().getExecutionContextChain().getCurrentElement().setResultingMessage(cleanedMessage);
+            UssdEventPublisher.publishUserSessionMessageUpdatedEvent(ussdModel.getOwnSession(), cleanedMessage);
+        });
         return processRawMsgWithTemplateModel(rawMsgText, ussdModel.getModelMap());
     }
 

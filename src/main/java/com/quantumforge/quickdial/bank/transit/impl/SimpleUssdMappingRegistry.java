@@ -155,6 +155,9 @@ public class SimpleUssdMappingRegistry implements UssdMappingRegistry {
         for(int i = 0; i < firstTokens.size(); i++){
             String currentFirstToken = firstTokens.get(i);
             String currentSecondToken = secondTokens.get(i);
+            if(currentFirstToken.equalsIgnoreCase(currentSecondToken)){
+                break;
+            }
             if(quickDialUtil.isParamMapping(currentFirstToken) && quickDialUtil.isDirectMapping(currentSecondToken)){
                 isAmbiguous = true;
                 break;

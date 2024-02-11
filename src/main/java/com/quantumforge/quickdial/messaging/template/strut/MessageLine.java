@@ -2,6 +2,7 @@ package com.quantumforge.quickdial.messaging.template.strut;
 
 import com.quantumforge.quickdial.common.StringValues;
 import lombok.Getter;
+import lombok.ToString;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -11,6 +12,7 @@ import static com.quantumforge.quickdial.messaging.config.QuickDialMessageSource
 import static com.quantumforge.quickdial.messaging.config.QuickDialMessageSourceConfigDefaultProperties.XML_MESSAGE_TAG;
 
 @Getter
+@ToString
 public class MessageLine {
 
     private final Map<String, Object> attributes = new HashMap<>();
