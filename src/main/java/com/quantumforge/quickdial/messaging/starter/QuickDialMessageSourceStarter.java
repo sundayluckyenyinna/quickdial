@@ -4,6 +4,7 @@ import com.quantumforge.quickdial.annotation.InjectDocument;
 import com.quantumforge.quickdial.bank.global.ApplicationItem;
 import com.quantumforge.quickdial.bank.global.ApplicationStore;
 import com.quantumforge.quickdial.bank.global.UssdBasicItemStore;
+import com.quantumforge.quickdial.bootstrap.CommonUssdConfigProperties;
 import com.quantumforge.quickdial.common.StringValues;
 import com.quantumforge.quickdial.event.UssdEventPublisher;
 import com.quantumforge.quickdial.exception.UnsupportedUssdMessageDocumentSourceException;
@@ -40,22 +41,21 @@ import org.springframework.util.ClassUtils;
 
 import java.io.File;
 import java.lang.reflect.Field;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Configuration
 @RequiredArgsConstructor
 @Order(value = Ordered.HIGHEST_PRECEDENCE)
-@EnableConfigurationProperties(value = { QuickDialMessageSourceConfigurationProperties.class, QuickDialMessageTemplateEngineConfigProperties.class } )
+@EnableConfigurationProperties(value = { QuickDialMessageSourceConfigurationProperties.class, QuickDialMessageTemplateEngineConfigProperties.class, CommonUssdConfigProperties.class } )
 public class QuickDialMessageSourceStarter{
 
     private final ApplicationStore applicationStore;
     private final UssdBasicItemStore ussdBasicItemStore;
     private final TemplateResolverRouter templateResolverRouter;
+    private final CommonUssdConfigProperties ussdConfigProperties;
     private final QuickDialMessageResource quickDialMessageResource;
     private final ConfigurableApplicationContext applicationContext;
     private final List<MessageSourceDocumentBuilder> documentRegistries;
@@ -108,6 +108,7 @@ public class QuickDialMessageSourceStarter{
                     .templateResolverRouter(templateResolverRouter)
                     .messageDocument(messageDocument)
                     .ussdBasicItemStore(ussdBasicItemStore)
+                    .ussdConfigProperties(ussdConfigProperties)
                     .build();
             UssdMessageDocumentResolver documentResolver = new DefaultUssdMessageDocumentResolver(buildItem);
             applicationContext.getBeanFactory().registerSingleton(beanName, documentResolver);
