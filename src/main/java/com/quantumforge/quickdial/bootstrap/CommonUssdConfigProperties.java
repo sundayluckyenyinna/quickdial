@@ -4,7 +4,7 @@ import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 @Data
-@ConfigurationProperties(prefix = "ussd.properties.config")
+@ConfigurationProperties(prefix = "spring.ussd.properties.config")
 public class CommonUssdConfigProperties {
 
     private String baseUssdCode = "*123#";
