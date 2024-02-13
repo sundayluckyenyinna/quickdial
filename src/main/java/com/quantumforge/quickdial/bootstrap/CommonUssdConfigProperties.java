@@ -13,4 +13,6 @@ public class CommonUssdConfigProperties {
     private boolean enableMenuOptionCheck = true;
     private Integer acceptableInputTrialTimes = 3;
     private boolean enableVerboseMappingLogs = true;
+    private String goBackMenuText = "Go back";
+    private String goForwardMenuText = "Go forward";
 }

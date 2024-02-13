@@ -3,6 +3,7 @@ package com.quantumforge.quickdial.messaging.template.engine;
 import com.quantumforge.quickdial.annotation.UssdSubMenuHandler;
 import com.quantumforge.quickdial.bank.global.ApplicationItem;
 import com.quantumforge.quickdial.bank.global.UssdBasicItemStore;
+import com.quantumforge.quickdial.bootstrap.CommonUssdConfigProperties;
 import com.quantumforge.quickdial.common.StringValues;
 import com.quantumforge.quickdial.context.UssdExecutionContext;
 import com.quantumforge.quickdial.context.UssdUserExecutionContext;
@@ -41,9 +42,8 @@ public final class ModelUssdMessageResolver{
     private final UssdModel ussdModel;
     private final String preferredEngine;
     private final UssdBasicItemStore ussdBasicItemStore;
+    private final CommonUssdConfigProperties ussdConfigProperties;
 
-    private static final String GO_BACK_PREFIX = "Go back";
-    private static final String GO_FORWARD_PREFIX = "Go forward";
 
 
     public ModelUssdMessageResolver(MessageDocumentResolverBuildItem buildItem, UssdModel ussdModel){
@@ -52,6 +52,7 @@ public final class ModelUssdMessageResolver{
         this.ussdModel = ussdModel;
         this.preferredEngine = buildItem.getPreferredEngine();
         this.ussdBasicItemStore = buildItem.getUssdBasicItemStore();
+        this.ussdConfigProperties = buildItem.getUssdConfigProperties();
     }
 
     public String getResolvedMessageById(String messageId){
@@ -110,14 +111,14 @@ public final class ModelUssdMessageResolver{
 
     private void configureGoBackNavOption(Message message){
         MessageLine goBackLine = new MessageLine();
-        goBackLine.setText(GO_BACK_PREFIX);
+        goBackLine.setText(ussdConfigProperties.getGoBackMenuText());
         goBackLine.getAttributes().put(XML_MESSAGE_OPTION, ussdBasicItemStore.getItem(ApplicationItem.USSD_GO_BACK_OPTION));
         message.getLines().add(goBackLine);
     }
 
     private void configureGoForwardNavOption(Message message){
         MessageLine goBackLine = new MessageLine();
-        goBackLine.setText(GO_FORWARD_PREFIX);
+        goBackLine.setText(ussdConfigProperties.getGoForwardMenuText());
         goBackLine.getAttributes().put(XML_MESSAGE_OPTION, ussdBasicItemStore.getItem(ApplicationItem.USSD_GO_FORWARD_OPTION));
         message.getLines().add(goBackLine);
     }
