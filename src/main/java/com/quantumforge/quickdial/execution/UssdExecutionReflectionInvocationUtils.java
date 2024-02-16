@@ -62,6 +62,7 @@ public class UssdExecutionReflectionInvocationUtils {
                 .sessionData(session.getSessionData())
                 .userUssdContext(userUssdContext)
                 .ussdModel(session.getUssdModel())
+                .session(session)
                 .build();
 
         Map<String, String> parameterValueMap = getUssdParamValueMapOnContextData(mappingWithoutBaseCode, cleanedContextData);
@@ -163,6 +164,9 @@ public class UssdExecutionReflectionInvocationUtils {
         }
         else if(parameter.getType().isAssignableFrom(UssdModel.class)){
             values[parameters.indexOf(parameter)] = exportableUssdMethodParameter.getUssdModel();
+        }
+        else if(parameter.getType().isAssignableFrom(UssdSession.class)){
+            values[parameters.indexOf(parameter)] = exportableUssdMethodParameter.getSession();
         }
     }
 
