@@ -148,7 +148,7 @@ Below outlines each fields of the QuickDialPayload.
 
 ## Ussd mapping
 <p align="justify">
-The philosophy of the quickdial library is very similar to the philosophy of springboot request handling. Every possible ussd operation initiated by user actions are mapped into ussd menu handlers. In the most basic form, a menu can be represented as a class while submenus will simply be methods in the class.
+The philosophy of the quickdial library is very similar to the philosophy of springboot request handling. Every possible ussd noInputOperation initiated by user actions are mapped into ussd menu handlers. In the most basic form, a menu can be represented as a class while submenus will simply be methods in the class.
 Annotations are used to specify the menu codes as well as the submenu codes of the ussd action.
 
 Now suppose that we intend to map a ussd session for user for account creation, we can create a class called **TestMenuHandler** for example, and then create the three(3) submenus in the methods to simulate the account creation (with BVN or without BVN).
@@ -460,7 +460,7 @@ The following rules must be applied when using the XML message template:
 
 3. **Step 3**
 
-Inject the document of choice in a handler class by virtue of its qualified name. The operation and functionality of the documents is held in a **UssdMessageDocumentResolver** interface.
+Inject the document of choice in a handler class by virtue of its qualified name. The noInputOperation and functionality of the documents is held in a **UssdMessageDocumentResolver** interface.
 
 The following illustrates the use of the UssdMessageDocumentResolver interface to read a message given a specified **messageId**
 
@@ -506,7 +506,7 @@ The above shows that all templating pattern of the thymeleaf will be supported a
 
 ## Events
 <p>
-Throughout the lifecycle of the Ussd application, **quickdial** emits certain important events that the developer can hook up on to perform certain operation. The table below shows a summary of the events, the time of events publication and the event object available for use in the listener operation.
+Throughout the lifecycle of the Ussd application, **quickdial** emits certain important events that the developer can hook up on to perform certain noInputOperation. The table below shows a summary of the events, the time of events publication and the event object available for use in the listener noInputOperation.
 </p>
 
 | Event | Description                                                                                                                       | Event object         | 

@@ -2,7 +2,6 @@ package com.quantumforge.quickdial.util;
 
 import com.quantumforge.quickdial.common.StringValues;
 
-import java.util.Collections;
 import java.util.Objects;
 import java.util.regex.Pattern;
 
@@ -39,9 +38,9 @@ public class GeneralUtils {
         return input.replaceAll(escapedToken + "+", token);
     }
 
-    public static void doIf(boolean condition, Operation operation){
+    public static void doIf(boolean condition, NoInputOperation noInputOperation){
         if(condition){
-            operation.execute();
+            noInputOperation.execute();
         }
     }
 

@@ -60,6 +60,20 @@ public final class ModelUssdMessageResolver{
     }
 
     public String getResolvedMessageById(String messageId, String separator){
+        Message cleanedMessage = getResolvedCleanMessageById(messageId);
+        configureNavigationOption(cleanedMessage, ussdModel);
+
+        OptionLineWriter optionLineWriter = OptionLineWriter.start();
+        cleanedMessage.getLines().forEach(messageLine -> optionLineWriter.addLine(messageLine.getOption(), messageLine.getText(), separator));
+        String rawMsgText = optionLineWriter.join();
+        GeneralUtils.doIf(Objects.nonNull(ussdModel.getOwnSession()), () -> {
+            ussdModel.getOwnSession().getExecutionContextChain().getCurrentElement().setResultingMessage(cleanedMessage);
+            UssdEventPublisher.publishUserSessionMessageUpdatedEvent(ussdModel.getOwnSession(), cleanedMessage);
+        });
+        return processRawMsgWithTemplateModel(rawMsgText, ussdModel.getModelMap());
+    }
+
+    public Message getResolvedCleanMessageById(String messageId){
         assert this.messageDocument != null;
         GeneralUtils.doIf(Objects.nonNull(ussdModel) && Objects.isNull(ussdModel.getObject(UssdInputValidationInterceptor.TEMPLATE_ERROR_KEY)), () -> ussdModel.addObject(UssdInputValidationInterceptor.TEMPLATE_ERROR_KEY, false));
         Message message = this.messageDocument.getMessages().stream()
@@ -71,17 +85,7 @@ public final class ModelUssdMessageResolver{
         rawResolvedTaggedMessage = cleanRawMessageTemplate(rawResolvedTaggedMessage);
         Document parsedDocument  = Jsoup.parse(rawResolvedTaggedMessage, Parser.xmlParser());
         Element messageElement = parsedDocument.child(0);
-        Message cleanedMessage = Message.buildSimilarCleanedMessage(message, messageElement);
-        configureNavigationOption(cleanedMessage, ussdModel);
-
-        OptionLineWriter optionLineWriter = OptionLineWriter.start();
-        cleanedMessage.getLines().forEach(messageLine -> optionLineWriter.addLine(messageLine.getOption(), messageLine.getText(), separator));
-        String rawMsgText = optionLineWriter.join();
-        GeneralUtils.doIf(Objects.nonNull(ussdModel.getOwnSession()), () -> {
-            ussdModel.getOwnSession().getExecutionContextChain().getCurrentElement().setResultingMessage(cleanedMessage);
-            UssdEventPublisher.publishUserSessionMessageUpdatedEvent(ussdModel.getOwnSession(), cleanedMessage);
-        });
-        return processRawMsgWithTemplateModel(rawMsgText, ussdModel.getModelMap());
+        return Message.buildSimilarCleanedMessage(message, messageElement);
     }
 
     private void configureNavigationOption(Message message, UssdModel model){
