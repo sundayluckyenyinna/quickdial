@@ -8,7 +8,7 @@ import java.lang.annotation.*;
 @Documented
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface UssdMenuHandler {
+public @interface UssdMenuMapping {
     String prefix() default StringValues.EMPTY_STRING;
     String menu() default StringValues.EMPTY_STRING;
     UssdInvocationType type() default UssdInvocationType.PROGRESSIVE;

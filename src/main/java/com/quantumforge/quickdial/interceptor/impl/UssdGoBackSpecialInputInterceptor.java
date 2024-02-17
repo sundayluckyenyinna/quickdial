@@ -1,7 +1,7 @@
 package com.quantumforge.quickdial.interceptor.impl;
 
 
-import com.quantumforge.quickdial.annotation.UssdSubMenuHandler;
+import com.quantumforge.quickdial.annotation.UssdSubMenuMapping;
 import com.quantumforge.quickdial.bootstrap.CommonUssdConfigProperties;
 import com.quantumforge.quickdial.context.UssdUserExecutionContext;
 import com.quantumforge.quickdial.exception.EmptyUssdUserSessionExecutionContextNavigableStackException;
@@ -48,7 +48,7 @@ public class UssdGoBackSpecialInputInterceptor implements UssdSpecialInputInterc
 
     private boolean supportsGoBackOperation(String input, UssdUserExecutionContext context){
         boolean defaultGoBackOption = ussdConfigProperties.getGoBackOption().equalsIgnoreCase(input);
-        UssdSubMenuHandler subMenuHandler = context.getExecutionContext().getInvocableMethod().getAnnotation(UssdSubMenuHandler.class);
+        UssdSubMenuMapping subMenuHandler = context.getExecutionContext().getInvocableMethod().getAnnotation(UssdSubMenuMapping.class);
         boolean relaxBackwardNavigation = Objects.nonNull(subMenuHandler) && subMenuHandler.relaxBackwardNavigation();
         return defaultGoBackOption && !relaxBackwardNavigation;
     }

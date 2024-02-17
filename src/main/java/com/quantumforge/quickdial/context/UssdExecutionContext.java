@@ -1,8 +1,8 @@
 package com.quantumforge.quickdial.context;
 
 import com.quantumforge.quickdial.annotation.UssdGroupMapping;
-import com.quantumforge.quickdial.annotation.UssdMenuHandler;
-import com.quantumforge.quickdial.annotation.UssdSubMenuHandler;
+import com.quantumforge.quickdial.annotation.UssdMenuMapping;
+import com.quantumforge.quickdial.annotation.UssdSubMenuMapping;
 import com.quantumforge.quickdial.common.StringValues;
 import com.quantumforge.quickdial.util.QuickDialUtil;
 import lombok.*;
@@ -27,8 +27,8 @@ public class UssdExecutionContext {
     private String callableClassName;
     private String classBeanName;
     private boolean isPossessLock = false;
-    private UssdMenuHandler menuHandler;
-    private UssdSubMenuHandler ussdSubMenuHandler;
+    private UssdMenuMapping menuHandler;
+    private UssdSubMenuMapping ussdSubMenuMapping;
     private UssdGroupMapping groupMapping;
     private UssdExecutableType parentExecutionType;
     private String contextId;

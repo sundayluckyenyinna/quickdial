@@ -7,7 +7,7 @@ import java.lang.annotation.*;
 @Documented
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface UssdSubMenuHandler {
+public @interface UssdSubMenuMapping {
 
     String id() default StringValues.EMPTY_STRING;
     String submenu() default StringValues.EMPTY_STRING;

@@ -1,6 +1,6 @@
 package com.quantumforge.quickdial.messaging.template.engine;
 
-import com.quantumforge.quickdial.annotation.UssdSubMenuHandler;
+import com.quantumforge.quickdial.annotation.UssdSubMenuMapping;
 import com.quantumforge.quickdial.bank.global.ApplicationItem;
 import com.quantumforge.quickdial.bank.global.UssdBasicItemStore;
 import com.quantumforge.quickdial.bootstrap.CommonUssdConfigProperties;
@@ -95,7 +95,7 @@ public final class ModelUssdMessageResolver{
                 UssdUserExecutionContext ussdUserExecutionContext = session.getExecutionContextChain().getCurrentElement();
                 if(!GeneralUtils.isNullOrEmpty(ussdUserExecutionContext)){
                     UssdExecutionContext ussdExecutionContext = ussdUserExecutionContext.getExecutionContext();
-                    UssdSubMenuHandler subMenuHandler = ussdExecutionContext.getUssdSubMenuHandler();
+                    UssdSubMenuMapping subMenuHandler = ussdExecutionContext.getUssdSubMenuMapping();
                     if(!GeneralUtils.isNullOrEmpty(subMenuHandler) && !subMenuHandler.hideNavigationOptions()){
                         if(!subMenuHandler.hideBackwardNavOption() || !subMenuHandler.hideForwardNavOption()) {
                             for (int i = 0; i < subMenuHandler.navOptionTopPadding(); i++) {

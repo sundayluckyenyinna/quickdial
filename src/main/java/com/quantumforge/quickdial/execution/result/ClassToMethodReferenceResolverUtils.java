@@ -2,7 +2,6 @@ package com.quantumforge.quickdial.execution.result;
 
 import com.quantumforge.quickdial.bootstrap.CommonUssdConfigProperties;
 import com.quantumforge.quickdial.context.UssdExecutionContext;
-import com.quantumforge.quickdial.util.GeneralUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -20,7 +19,7 @@ public class ClassToMethodReferenceResolverUtils {
     private final UssdRedirectConfigProperties redirectConfigProperties;
 
     public String resolveUssdContextId(UssdExecutionContext ussdExecutionContext){
-        String resultantId = ussdExecutionContext.getUssdSubMenuHandler().id();
+        String resultantId = ussdExecutionContext.getUssdSubMenuMapping().id();
         if(Objects.nonNull(resultantId) && !resultantId.trim().isEmpty()){
             return resultantId;
         }

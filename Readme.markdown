@@ -104,7 +104,7 @@ The ussd application can consist of the following:
 
     - UssdService: The service layer of the ussd application. The **QuickDialPayload** should be properly built at this layer and the **QuickDialUssdExecutor** should be invoked here calling the '**submit(QuickDialPayload payload)**' method.
 
-    - MenuHandler: The menu handlers are series of classes annotated with the **@UssdMenuHandler** annotation and defines mapping for the ussd session for the user journey. Here, each ussd action is mapped to an invocable method decorated with the **@UssdSubmenuHandler** annotation.
+    - MenuHandler: The menu handlers are series of classes annotated with the **@UssdMenuMapping** annotation and defines mapping for the ussd session for the user journey. Here, each ussd action is mapped to an invocable method decorated with the **@UssdSubMenuMapping** annotation.
     
 
 ## Autoconfiguration
@@ -161,7 +161,7 @@ The following code snippets shows how the mapping is done in a very simple way.
 // imports
 
 import com.quantumforge.quickdial.annotation.UssdParam;
-import com.quantumforge.quickdial.annotation.UssdSubMenuHandler;
+import com.quantumforge.quickdial.annotation.UssdSubMenuMapping;
 import com.quantumforge.quickdial.context.UserUssdContext;
 import com.quantumforge.quickdial.session.SessionData;
 import com.quantumforge.quickdial.session.UssdSession;
@@ -170,49 +170,49 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @RequiredArgsConstructor
-@UssdMenuHandler(menu = "1")
+@UssdMenuMapping(menu = "1")
 public class TestMenuHandler {
 
- private final UserService userService;
+    private final UserService userService;
 
- @UssdSubMenuHandler    // => *123*1#
- public String showAccountOpeningMenus(UserUssdContext userUssdContext, SessionData sessionData, UssdSession ussdSession) {
+    @UssdSubMenuMapping    // => *123*1#
+    public String showAccountOpeningMenus(UserUssdContext userUssdContext, SessionData sessionData, UssdSession ussdSession) {
 
-     return "1. Open account with BVN \n2. Open account without BVN";
- }
-
-
- @UssdSubMenuHandler(submenu = "1")   // => *123*1*1#
- public String enterBVNForAccountOpeningPage(UserUssdContext userUssdContext, UssdSession ussdSession) {
-     return "Enter your BVN";
- }
-
- @UssdSubMenuHandler(submenu = "*1*{bvnEntered}#")  // => *123*1*1*1123456789#
- public String showBVNDetailsPage(@UssdParam("bvnEntered") String bvn, UserUssdContext userUssdContext, UssdSession ussdSession, SessionData sessionData) {
-     // log the bvn entered by the user. The @UssdParam annotation binds the bvn entered by the user the bvn variable.
-     log.info("Customer BVN entered -------------------------{}", bvn);
-     // Store the bvn entered by the user to the injected SessionData store
-     sessionData.keepAttribute("userBvn", bvn);
-     return "Name attached to BVN details is: John Doe.\n1. Continue \n2. Cancel";
- }
-
-  @UssdSubMenuHandler(submenu = "*1*{bvnEntered}*1#")  // *123*1*1*1123456789*1#
-  public String showSuccessPage(@UssdParam("bvnEntered") String bvn, UserUssdContext userUssdContext, UssdSession ussdSession, SessionData sessionData) {
-     String mobileNumber = userUssdContext.getMsisdn();  // User mobileNumber sent from the UssdProvider via the network provider.
-     boolean success = userService.createUserAndAccountWithBvn(bvn, mobileNumber);
-     if(success){
-         return "Congrats!. Account created successfully";
-     }else{
-         return "Oops! something went wrong";
-     }
-  }
+        return "1. Open account with BVN \n2. Open account without BVN";
+    }
 
 
-  // Create handler methods to handle Submenu 2 (Opening Account without BVN) ...
-  @UssdSubMenuHandler(submenu = "2")   // *123*1*2#
-  public String enterFirstNamePage(UserUssdContext userUssdContext, UssdSession ussdSession) {
- 
-  }
+    @UssdSubMenuMapping(submenu = "1")   // => *123*1*1#
+    public String enterBVNForAccountOpeningPage(UserUssdContext userUssdContext, UssdSession ussdSession) {
+        return "Enter your BVN";
+    }
+
+    @UssdSubMenuMapping(submenu = "*1*{bvnEntered}#")  // => *123*1*1*1123456789#
+    public String showBVNDetailsPage(@UssdParam("bvnEntered") String bvn, UserUssdContext userUssdContext, UssdSession ussdSession, SessionData sessionData) {
+        // log the bvn entered by the user. The @UssdParam annotation binds the bvn entered by the user the bvn variable.
+        log.info("Customer BVN entered -------------------------{}", bvn);
+        // Store the bvn entered by the user to the injected SessionData store
+        sessionData.keepAttribute("userBvn", bvn);
+        return "Name attached to BVN details is: John Doe.\n1. Continue \n2. Cancel";
+    }
+
+    @UssdSubMenuMapping(submenu = "*1*{bvnEntered}*1#")  // *123*1*1*1123456789*1#
+    public String showSuccessPage(@UssdParam("bvnEntered") String bvn, UserUssdContext userUssdContext, UssdSession ussdSession, SessionData sessionData) {
+        String mobileNumber = userUssdContext.getMsisdn();  // User mobileNumber sent from the UssdProvider via the network provider.
+        boolean success = userService.createUserAndAccountWithBvn(bvn, mobileNumber);
+        if (success) {
+            return "Congrats!. Account created successfully";
+        } else {
+            return "Oops! something went wrong";
+        }
+    }
+
+
+    // Create handler methods to handle Submenu 2 (Opening Account without BVN) ...
+    @UssdSubMenuMapping(submenu = "2")   // *123*1*2#
+    public String enterFirstNamePage(UserUssdContext userUssdContext, UssdSession ussdSession) {
+
+    }
 
 }
 
@@ -235,7 +235,7 @@ The following code snippets illustrates how the developer can control the flow o
 ```java
 
 import com.quantumforge.quickdial.annotation.UssdParam;
-import com.quantumforge.quickdial.annotation.UssdSubMenuHandler;
+import com.quantumforge.quickdial.annotation.UssdSubMenuMapping;
 import com.quantumforge.quickdial.context.UserUssdContext;
 import com.quantumforge.quickdial.payload.UssdExecution;
 import com.quantumforge.quickdial.session.SessionData;
@@ -245,48 +245,48 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @RequiredArgsConstructor
-@UssdMenuHandler(menu = "1")
+@UssdMenuMapping(menu = "1")
 public class TestMenuHandler {
 
- private final UserService userService;
+    private final UserService userService;
 
- @UssdSubMenuHandler    // => *123*1#
- public UssdExecution<String> showAccountOpeningMenus(UserUssdContext userUssdContext, SessionData sessionData, UssdSession ussdSession) {
-    return UssdExecution.continues("1. Open account with BVN \n2. Open account without BVN");   // This continues the ussd session on showing this message or page.
- }
+    @UssdSubMenuMapping    // => *123*1#
+    public UssdExecution<String> showAccountOpeningMenus(UserUssdContext userUssdContext, SessionData sessionData, UssdSession ussdSession) {
+        return UssdExecution.continues("1. Open account with BVN \n2. Open account without BVN");   // This continues the ussd session on showing this message or page.
+    }
 
 
- @UssdSubMenuHandler(submenu = "1")   // => *123*1*1#
- public UssdExecution<String> enterBVNForAccountOpeningPage(UserUssdContext userUssdContext, UssdSession ussdSession) {
-        return UssdExecution.continues("Enter your BVN"); 
- }
+    @UssdSubMenuMapping(submenu = "1")   // => *123*1*1#
+    public UssdExecution<String> enterBVNForAccountOpeningPage(UserUssdContext userUssdContext, UssdSession ussdSession) {
+        return UssdExecution.continues("Enter your BVN");
+    }
 
- @UssdSubMenuHandler(submenu = "*1*{bvnEntered}#")  // => *123*1*1*1123456789#
- public UssdExecution<String> showBVNDetailsPage(@UssdParam("bvnEntered") String bvn, UserUssdContext userUssdContext, UssdSession ussdSession, SessionData sessionData) {
-    log.info("Customer BVN entered -------------------------{}", bvn);
-    sessionData.keepAttribute("userBvn", bvn);
-    return UssdExecution.continues("Name attached to BVN details is: John Doe.\n1. Continue \n2. Try again");
- }
+    @UssdSubMenuMapping(submenu = "*1*{bvnEntered}#")  // => *123*1*1*1123456789#
+    public UssdExecution<String> showBVNDetailsPage(@UssdParam("bvnEntered") String bvn, UserUssdContext userUssdContext, UssdSession ussdSession, SessionData sessionData) {
+        log.info("Customer BVN entered -------------------------{}", bvn);
+        sessionData.keepAttribute("userBvn", bvn);
+        return UssdExecution.continues("Name attached to BVN details is: John Doe.\n1. Continue \n2. Try again");
+    }
 
- @UssdSubMenuHandler(submenu = "*1*{bvnEntered}*{continueOption}#")  // *123*1*1*1123456789*1#
- public UssdExecution<String> showSuccessPage(@UssdParam("bvnEntered") String bvn, @UssdParam("continueOption") String option, UserUssdContext userUssdContext, UssdSession ussdSession, SessionData sessionData) {
-     // User entered 1 from above. Thus, user wants to continue
-     if(option.equalsIgnoreCase("1")) { 
-         String mobileNumber = userUssdContext.getMsisdn();  // User mobileNumber sent from the UssdProvider via the network provider.
-         boolean success = userService.createUserAndAccountWithBvn(bvn, mobileNumber);
-         if (success) {
-             return UssdExecution.continues("Congrats!. Account created successfully");
-         } else {
-             return UssdExecution.end("Oops! something went wrong");
-         }
-     }
-     
-     // User entered 2. Thus, user claims that the BVN is not his and wants to try again. We will then redirect user to the page before the above page.
-     else if(option.equalsIgnoreCase("2")){
-         UssdExecution.redirect("this::enterBVNForAccountOpeningPage");  // method to be redirected to is in same class. Thus use 'this' for shorthand
-         UssdExecution.redirect("TestMenuHandler::enterBVNForAccountOpeningPage"); // another way of redirecting with 'class::method' reference
-     }
-  }
+    @UssdSubMenuMapping(submenu = "*1*{bvnEntered}*{continueOption}#")  // *123*1*1*1123456789*1#
+    public UssdExecution<String> showSuccessPage(@UssdParam("bvnEntered") String bvn, @UssdParam("continueOption") String option, UserUssdContext userUssdContext, UssdSession ussdSession, SessionData sessionData) {
+        // User entered 1 from above. Thus, user wants to continue
+        if (option.equalsIgnoreCase("1")) {
+            String mobileNumber = userUssdContext.getMsisdn();  // User mobileNumber sent from the UssdProvider via the network provider.
+            boolean success = userService.createUserAndAccountWithBvn(bvn, mobileNumber);
+            if (success) {
+                return UssdExecution.continues("Congrats!. Account created successfully");
+            } else {
+                return UssdExecution.end("Oops! something went wrong");
+            }
+        }
+
+        // User entered 2. Thus, user claims that the BVN is not his and wants to try again. We will then redirect user to the page before the above page.
+        else if (option.equalsIgnoreCase("2")) {
+            UssdExecution.redirect("this::enterBVNForAccountOpeningPage");  // method to be redirected to is in same class. Thus use 'this' for shorthand
+            UssdExecution.redirect("TestMenuHandler::enterBVNForAccountOpeningPage"); // another way of redirecting with 'class::method' reference
+        }
+    }
 
 }
 
@@ -320,16 +320,16 @@ Following below dictates how this feature can be autoconfigured
  spring.ussd.redirect.inputValidationErrorRedirectReference=class::method (the default is the first page)
  spring.ussd.redirect.defaultInputValidationMessage=Invalid input. Please select correct option. [[${errorRetryAttemptLeft}]] [[${errorRetrySuffix}]] left.
 ```
-Also, an option can be passed to the UssdSubMenuHandler annotation of the handler methods to instruct **quickdial** to skip menu option validation for the said handler.
+Also, an option can be passed to the UssdSubMenuMapping annotation of the handler methods to instruct **quickdial** to skip menu option validation for the said handler.
 
 ```java
 
-import com.quantumforge.quickdial.annotation.UssdSubMenuHandler;
+import com.quantumforge.quickdial.annotation.UssdSubMenuMapping;
 
 public class TestMenuHandler {
-    
+
     // Turn off menu option check
-    @UssdSubMenuHandler(submenu = "1", relaxMenuOptionCheck = true)
+    @UssdSubMenuMapping(submenu = "1", relaxMenuOptionCheck = true)
     public UssdExecution<String> showMenus() {
 
     }
@@ -353,21 +353,21 @@ The code snippets below illustrates how to use the OptionLineBuilder to create c
 
 ```java
 
-import com.quantumforge.quickdial.annotation.UssdSubMenuHandler;
+import com.quantumforge.quickdial.annotation.UssdSubMenuMapping;
 import com.quantumforge.quickdial.messaging.template.instrumentation.OptionLineWriter;
 import com.quantumforge.quickdial.payload.UssdExecution;
 
 
 public class TestMenuHandler {
 
-     @UssdSubMenuHandler(submenu = "1")    // => *123*1#
-     public UssdExecution<String> showAccountOpeningMenus(UserUssdContext userUssdContext, SessionData sessionData, UssdSession ussdSession) {
-          String message = OptionLineWriter.start()
-                  .addLine("1", "Open account with BVN")
-                  .addLine("2", "Open account without BVN")
-                  .join();  // Build the final message by calling the 'join()' method.
-          return UssdExecution.continues(message);
-     }
+    @UssdSubMenuMapping(submenu = "1")    // => *123*1#
+    public UssdExecution<String> showAccountOpeningMenus(UserUssdContext userUssdContext, SessionData sessionData, UssdSession ussdSession) {
+        String message = OptionLineWriter.start()
+                .addLine("1", "Open account with BVN")
+                .addLine("2", "Open account without BVN")
+                .join();  // Build the final message by calling the 'join()' method.
+        return UssdExecution.continues(message);
+    }
 }
 ```
 .
@@ -471,7 +471,7 @@ The following illustrates the use of the UssdMessageDocumentResolver interface t
         @InjectDocument("home_quickdial")    // use the qualified name to inject the document to be used
         private UssdMessageDocumentResolver documentResolver;
 
-        @UssdSubMenuHandler
+        @UssdSubMenuMapping
         public String showStartPageOfCharges(UssdModel model){
             model.addObject("accountNumber", "2020202020");
             model.addObject("customerId", "123456");
@@ -502,7 +502,7 @@ Other configurations related to the messaging includes
     quickdial.nestedFileSeparator=UNDER_SCORE (other value is DOT)          // specify the joiner or operator for the qualified name of the documents
     quickdial.optionToMessageSeparator=". " (default)                       // specifies the joiner between each option and content of a message line
 ```
-The above shows that all templating pattern of the thymeleaf will be supported and the thymeleaf template context for data replacement will be read from the **UssdModel** auto-injectable in the UssdSubMenuHandler methods.
+The above shows that all templating pattern of the thymeleaf will be supported and the thymeleaf template context for data replacement will be read from the **UssdModel** auto-injectable in the UssdSubMenuMapping methods.
 
 ## Events
 <p>
@@ -526,7 +526,7 @@ The application store is a very convenient way of storing data that do not chang
 
 For example, it is a common knowledge the bank codes of banks do not change frequently, so it is a performance boost strategy to retrieve them once during application startup and save them to the ApplicationStore. When it is needed to be displayed to the user on a ussd page, the bank information can then be fetched from the proximity of the ApplicationStore rather than by the overhead of a network call or a database lookup.
 
-The following code snippets shows how the ApplicationStore can be used to store data (for example, when the ussd context is initialized) and then displayed to the user in a UssdSubMenuHandler
+The following code snippets shows how the ApplicationStore can be used to store data (for example, when the ussd context is initialized) and then displayed to the user in a UssdSubMenuMapping
 </p>
 
 ```java
@@ -559,8 +559,8 @@ public class UssdEventConfiguration {
 ```java
 
 import com.quantumforge.quickdial.annotation.InjectDocument;
-import com.quantumforge.quickdial.annotation.UssdMenuHandler;
-import com.quantumforge.quickdial.annotation.UssdSubMenuHandler;
+import com.quantumforge.quickdial.annotation.UssdMenuMapping;
+import com.quantumforge.quickdial.annotation.UssdSubMenuMapping;
 import com.quantumforge.quickdial.bank.global.ApplicationStore;
 import com.quantumforge.quickdial.messaging.template.engine.UssdMessageDocumentResolver;
 import com.quantumforge.quickdial.payload.UssdExecution;
@@ -573,7 +573,7 @@ import lombok.extern.slf4j.Slf4j;
 import java.util.List;
 
 @Slf4j
-@UssdMenuHandler
+@UssdMenuMapping
 @RequiredArgsConstructor
 public class TestMenuHandler {
 
@@ -581,7 +581,7 @@ public class TestMenuHandler {
     private final UssdMessageDocumentResolver documentResolver;
     private final ApplicationStore applicationStore;
 
-    @UssdSubMenuHandler
+    @UssdSubMenuMapping
     public UssdExecution<String> showBanksForTransaction(UssdModel ussdModel, SessionData sessionData, UssdSession session) {
         List<String> bankData = (List<BankData>) applicationStore.getItem("bankData");
         List<String> bankNames = bankData.stream().map(data -> data.getBankName());

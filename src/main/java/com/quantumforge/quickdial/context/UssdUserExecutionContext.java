@@ -1,6 +1,6 @@
 package com.quantumforge.quickdial.context;
 
-import com.quantumforge.quickdial.annotation.UssdSubMenuHandler;
+import com.quantumforge.quickdial.annotation.UssdSubMenuMapping;
 import com.quantumforge.quickdial.execution.provider.UssdInvocationType;
 import com.quantumforge.quickdial.messaging.template.strut.Message;
 import com.quantumforge.quickdial.util.QuickDialUtil;
@@ -44,7 +44,7 @@ public class UssdUserExecutionContext {
     }
 
     public boolean isRelaxMenuOptionCheck(){
-        UssdSubMenuHandler subMenuHandler = getExecutionContext().getUssdSubMenuHandler();
+        UssdSubMenuMapping subMenuHandler = getExecutionContext().getUssdSubMenuMapping();
         return Objects.nonNull(subMenuHandler) && subMenuHandler.relaxMenuOptionCheck();
     }
 

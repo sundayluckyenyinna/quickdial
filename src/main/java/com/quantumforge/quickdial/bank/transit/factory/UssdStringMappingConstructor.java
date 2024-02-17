@@ -1,8 +1,8 @@
 package com.quantumforge.quickdial.bank.transit.factory;
 
-import com.quantumforge.quickdial.annotation.UssdMenuHandler;
-import com.quantumforge.quickdial.annotation.UssdSubMenuHandler;
+import com.quantumforge.quickdial.annotation.UssdMenuMapping;
+import com.quantumforge.quickdial.annotation.UssdSubMenuMapping;
 
 public interface UssdStringMappingConstructor {
-    String constructStringMapping(UssdMenuHandler menuHandler, UssdSubMenuHandler subMenuHandler);
+    String constructStringMapping(UssdMenuMapping menuHandler, UssdSubMenuMapping subMenuHandler);
 }

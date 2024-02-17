@@ -1,7 +1,7 @@
 package com.quantumforge.quickdial.bank.transit.factory;
 
-import com.quantumforge.quickdial.annotation.UssdMenuHandler;
-import com.quantumforge.quickdial.annotation.UssdSubMenuHandler;
+import com.quantumforge.quickdial.annotation.UssdMenuMapping;
+import com.quantumforge.quickdial.annotation.UssdSubMenuMapping;
 import com.quantumforge.quickdial.bootstrap.CommonUssdConfigProperties;
 import com.quantumforge.quickdial.common.StringValues;
 import com.quantumforge.quickdial.execution.provider.UssdInvocationType;
@@ -28,7 +28,7 @@ public class SimpleUssdStringMappingConstructor implements UssdStringMappingCons
     private final UssdUtilProperties ussdUtilProperties;
     private final CommonUssdConfigProperties ussdConfigProperties;
     @Override
-    public String constructStringMapping(UssdMenuHandler menuHandler, UssdSubMenuHandler subMenuHandler){
+    public String constructStringMapping(UssdMenuMapping menuHandler, UssdSubMenuMapping subMenuHandler){
         List<String> tokens = new ArrayList<>(quickDialUtil.getTokensBetweenDelimiters(ussdConfigProperties.getBaseUssdCode()));
         List<String> finalTokens = tokens;
         GeneralUtils.doIf(menuHandler.type() == UssdInvocationType.SHORT_CODE, ()-> finalTokens.add(ussdUtilProperties.getShortCodePrefix()));
