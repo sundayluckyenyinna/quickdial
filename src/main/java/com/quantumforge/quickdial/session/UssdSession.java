@@ -12,6 +12,7 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 
 @Data
@@ -70,8 +71,9 @@ public class UssdSession {
         }
         if(hasNotRegisteredUserUssdContext(ussdUserExecutionContext)){
             this.getExecutionContextChain().add(ussdUserExecutionContext);
+            int latestAddedIndex = getExecutionContextChain().indexOf(ussdUserExecutionContext);
+            getExecutionContextChain().setCurrentNavigationIndexAtIndex(latestAddedIndex);
         }
-
     }
 
     public boolean hasNotRegisteredUserUssdContext(UssdUserExecutionContext context){
