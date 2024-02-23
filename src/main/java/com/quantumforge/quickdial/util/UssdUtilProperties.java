@@ -4,7 +4,7 @@ import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 @Data
-@ConfigurationProperties(prefix = "ussd.util")
+@ConfigurationProperties(prefix = "spring.ussd.util")
 public class UssdUtilProperties {
 
     private String startDelimiter = "\\*";
