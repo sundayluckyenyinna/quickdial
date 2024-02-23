@@ -18,8 +18,9 @@ public final class SessionData {
 
     private final ConcurrentMap<String, Object> SESSION_DATA_REPO = new ConcurrentHashMap<>();
 
-    public void keepAttribute(String key, Object attr){
+    public SessionData keepAttribute(String key, Object attr){
         addOrThrowException(key, attr);
+        return this;
     }
 
     public Object getAttribute(String key){
