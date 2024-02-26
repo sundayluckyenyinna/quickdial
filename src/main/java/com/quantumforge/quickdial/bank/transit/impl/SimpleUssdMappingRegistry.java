@@ -1,5 +1,6 @@
 package com.quantumforge.quickdial.bank.transit.impl;
 
+import com.quantumforge.quickdial.QColor;
 import com.quantumforge.quickdial.bank.transit.UssdMappingRegistry;
 import com.quantumforge.quickdial.bank.transit.factory.UssdMappingContextProviderFactory;
 import com.quantumforge.quickdial.bank.transit.factory.UssdMappingContextRegistrationFactory;
@@ -9,6 +10,7 @@ import com.quantumforge.quickdial.event.UssdEventPublisher;
 import com.quantumforge.quickdial.exception.AmbiguousUssdMappingException;
 import com.quantumforge.quickdial.exception.InvalidRuntimeGroupIdException;
 import com.quantumforge.quickdial.exception.NoUssdMappingFoundException;
+import com.quantumforge.quickdial.logger.QuickDialLogger;
 import com.quantumforge.quickdial.util.QuickDialUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -203,11 +205,12 @@ public class SimpleUssdMappingRegistry implements UssdMappingRegistry {
     }
 
     private void logUssdExecutionContext(UssdExecutionContext executionContext){
-        log.info("Ussd Mapping: {}", executionContext.getUssdMapping());
-        log.info("Invocation Method: {}", executionContext.getInvocableMethod().getName());
-        log.info("RedirectID: {}", executionContext.getContextId());
-        log.info("Declaring class: {}", executionContext.getCallableClass().getName());
-        log.info("Spring Enhanced class: {}", executionContext.getCallableClass().getName());
-        log.info("Parent execution type: {}", executionContext.getParentExecutionType());
+        QuickDialLogger.logInfo("Ussd Mapping: {}", QColor.Green, executionContext.getUssdMapping());
+        QuickDialLogger.logInfo("Invocation Method: {}", QColor.Blue, executionContext.getInvocableMethod().getName());
+        QuickDialLogger.logInfo("RedirectID: {}", null, executionContext.getContextId());
+        QuickDialLogger.logInfo("Declaring class: {}", null, executionContext.getCallableClass().getName());
+        QuickDialLogger.logInfo("Spring Enhanced class: {}", null, executionContext.getCallableClass().getName());
+        QuickDialLogger.logInfo("Parent execution type: {}", QColor.Yellow, executionContext.getParentExecutionType().name());
+        System.out.println();
     }
 }
