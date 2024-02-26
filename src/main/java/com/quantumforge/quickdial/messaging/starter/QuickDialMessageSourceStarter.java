@@ -1,5 +1,6 @@
 package com.quantumforge.quickdial.messaging.starter;
 
+import com.quantumforge.quickdial.QColor;
 import com.quantumforge.quickdial.annotation.InjectDocument;
 import com.quantumforge.quickdial.bank.global.ApplicationItem;
 import com.quantumforge.quickdial.bank.global.ApplicationStore;
@@ -8,6 +9,7 @@ import com.quantumforge.quickdial.bootstrap.CommonUssdConfigProperties;
 import com.quantumforge.quickdial.common.StringValues;
 import com.quantumforge.quickdial.event.UssdEventPublisher;
 import com.quantumforge.quickdial.exception.UnsupportedUssdMessageDocumentSourceException;
+import com.quantumforge.quickdial.logger.QuickDialLogger;
 import com.quantumforge.quickdial.messaging.bean.QuickDialMessageResource;
 import com.quantumforge.quickdial.messaging.builder.DocumentType;
 import com.quantumforge.quickdial.messaging.builder.MessageSourceDocumentBuilder;
@@ -174,15 +176,16 @@ public class QuickDialMessageSourceStarter{
             log.info("================================================= USSD MESSAGE DOCUMENTS =================================================");
             messageDocuments.getMessageDocuments().forEach(messageDocument -> {
                 boolean isLastMessage = messageDocuments.getMessageDocuments().indexOf(messageDocument) == messageDocuments.getMessageDocuments().size() - 1;
-                log.info("File name: {}", messageDocument.getFileName());
-                log.info("Qualified file name: {}", messageDocument.getQualifiedName());
-                log.info("Number of scanned messages: {}", messageDocument.getMessages().size());
+                QuickDialLogger.logInfo("File name: {}", QColor.Green, messageDocument.getFileName());
+                QuickDialLogger.logInfo("Qualified file name: {}", QColor.Blue, messageDocument.getQualifiedName());
+                QuickDialLogger.logInfo("Number of scanned messages: {}", QColor.Yellow, String.valueOf(messageDocument.getMessages().size()));
                 try {
                     log.info("Absolute file path: {}", messageDocument.getFile().getAbsolutePath());
                 } catch (Exception ignored) {
                 }
                 if (!isLastMessage) {
                     log.info("--------------------------------------------------------------------------------------------------------------------------");
+                    System.out.println();
                 }
             });
             log.info("==========================================================================================================================");
