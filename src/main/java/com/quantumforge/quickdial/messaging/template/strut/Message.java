@@ -46,7 +46,7 @@ public class Message {
         this.attributes = attributes;
     }
 
-    private MessageLine getLineByOption(String option){
+    public MessageLine getLineByOption(String option){
         return this.lines.stream().filter(messageLine -> {
             Object attr = messageLine.getAttributes().get("option");
             return (messageLine.hasOption() && messageLine.getOption().equalsIgnoreCase(option)) ||
