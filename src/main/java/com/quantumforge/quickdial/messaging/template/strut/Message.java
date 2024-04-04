@@ -46,6 +46,14 @@ public class Message {
         this.attributes = attributes;
     }
 
+    private MessageLine getLineByOption(String option){
+        return this.lines.stream().filter(messageLine -> {
+            Object attr = messageLine.getAttributes().get("option");
+            return (messageLine.hasOption() && messageLine.getOption().equalsIgnoreCase(option)) ||
+                    (Objects.nonNull(attr) && String.valueOf(attr).equalsIgnoreCase(option));
+        }).findFirst().orElse(null);
+    }
+
     public void setRawTaggedMessage(String rawTaggedMessage){
         this.rawTaggedMessage = rawTaggedMessage;
     }
