@@ -173,7 +173,7 @@ public class QuickDialMessageSourceStarter{
             messageDocuments.getMessageDocuments().forEach(messageDocument -> {
                 boolean isLastMessage = messageDocuments.getMessageDocuments().indexOf(messageDocument) == messageDocuments.getMessageDocuments().size() - 1;
                 QuickDialLogger.logInfo("File name: {}", QColor.Green, messageDocument.getFileName());
-                QuickDialLogger.logInfo("Qualified file name: {}", QColor.Blue, messageDocument.getQualifiedName());
+                QuickDialLogger.logInfo("Qualified bean name: {}", QColor.Blue, messageDocument.getQualifiedName());
                 QuickDialLogger.logInfo("Number of scanned messages: {}", QColor.Yellow, String.valueOf(messageDocument.getMessages().size()));
                 try {
                     log.info("Resource file path: {}", messageDocument.getResourceFilePath());
