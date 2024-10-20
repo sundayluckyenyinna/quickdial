@@ -1,6 +1,5 @@
 package com.quantumforge.quickdial.messaging.starter;
 
-import com.quantumforge.quickdial.QColor;
 import com.quantumforge.quickdial.annotation.InjectDocument;
 import com.quantumforge.quickdial.bank.global.ApplicationItem;
 import com.quantumforge.quickdial.bank.global.ApplicationStore;
@@ -23,8 +22,8 @@ import com.quantumforge.quickdial.messaging.template.resolvers.TemplateResolverR
 import com.quantumforge.quickdial.messaging.template.strut.FileResource;
 import com.quantumforge.quickdial.messaging.template.strut.MessageDocument;
 import com.quantumforge.quickdial.messaging.template.strut.MessageDocuments;
-import com.quantumforge.quickdial.util.FileUtils;
 import com.quantumforge.quickdial.util.GeneralUtils;
+import com.quantumforge.quickdial.util.QColor;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -41,7 +40,6 @@ import org.springframework.core.type.filter.AnnotationTypeFilter;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ClassUtils;
 
-import java.io.File;
 import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Map;
@@ -63,7 +61,6 @@ public class QuickDialMessageSourceStarter{
     private final List<MessageSourceDocumentBuilder> documentRegistries;
     private final QuickDialMessageSourceConfigurationProperties properties;
     private final QuickDialMessageTemplateEngineConfigProperties templateEngineConfig;
-
     public static QuickDialMessageSourceConfigurationProperties sProperties;
 
     @Bean
@@ -77,32 +74,31 @@ public class QuickDialMessageSourceStarter{
 
     private void initMessageSourceOnStartup(){
         try {
-            if(!GeneralUtils.isNullOrEmpty(quickDialMessageResource) && !GeneralUtils.isNullOrEmpty(quickDialMessageResource.getPrimaryResourceFolder())) {
-                File file = quickDialMessageResource.getPrimaryResourceFolder();
-                saveMessageDocumentsToMemory(FileUtils.getFileResourcesInBaseFolder(file, resolveNestedFileSeparator(properties.getNestedFileSeparator())));
+            if(!GeneralUtils.isNullOrEmpty(quickDialMessageResource)) {
+                List<FileResource> fileResources = quickDialMessageResource.getFileResources();
+                saveMessageDocumentsToMemory(fileResources);
             }
         }catch (Exception exception){
             log.error("Exception encountered during ussd message source initialization. Exception message is: {}", exception.getMessage());
         }
     }
 
-
     private void saveMessageDocumentsToMemory(List<FileResource> fileResources) {
         MessageDocuments messageDocuments = new MessageDocuments();
         fileResources
                 .forEach(fileResource -> {
-                    MessageSourceDocumentBuilder registry = getSupportingDocumentRegistry(fileResource.getFileExtension());
-                    MessageDocument messageDocument = registry.buildDocument(fileResource);
+                    MessageSourceDocumentBuilder builder = getSupportingDocumentRegistry(fileResource.getFileExtension());
+                    MessageDocument messageDocument = builder.buildDocument(fileResource);
                     messageDocuments.getMessageDocuments().add(messageDocument);
                 });
         applicationStore.setItem(ApplicationItem.MESSAGE_DOCUMENTS.name(), messageDocuments);
-        registerMessageDocumentToConfigurableApplicationContext(messageDocuments);
+        registerMessageDocumentsToConfigurableApplicationContext(messageDocuments);
         if(properties.isEnableVerboseTemplateLogging()){
             verboseMessageDocumentStarterLog(messageDocuments);
         }
     }
 
-    private void registerMessageDocumentToConfigurableApplicationContext(MessageDocuments messageDocuments){
+    private void registerMessageDocumentsToConfigurableApplicationContext(MessageDocuments messageDocuments){
         messageDocuments.getMessageDocuments().forEach(messageDocument -> {
             String beanName = messageDocument.getQualifiedName();
             MessageDocumentResolverBuildItem buildItem = MessageDocumentResolverBuildItem.builder()
@@ -180,7 +176,7 @@ public class QuickDialMessageSourceStarter{
                 QuickDialLogger.logInfo("Qualified file name: {}", QColor.Blue, messageDocument.getQualifiedName());
                 QuickDialLogger.logInfo("Number of scanned messages: {}", QColor.Yellow, String.valueOf(messageDocument.getMessages().size()));
                 try {
-                    log.info("Absolute file path: {}", messageDocument.getFile().getAbsolutePath());
+                    log.info("Resource file path: {}", messageDocument.getResourceFilePath());
                 } catch (Exception ignored) {
                 }
                 if (!isLastMessage) {

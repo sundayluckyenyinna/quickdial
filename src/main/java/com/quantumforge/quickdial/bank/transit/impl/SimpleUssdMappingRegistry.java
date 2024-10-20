@@ -1,6 +1,6 @@
 package com.quantumforge.quickdial.bank.transit.impl;
 
-import com.quantumforge.quickdial.QColor;
+import com.quantumforge.quickdial.util.QColor;
 import com.quantumforge.quickdial.bank.transit.UssdMappingRegistry;
 import com.quantumforge.quickdial.bank.transit.factory.UssdMappingContextProviderFactory;
 import com.quantumforge.quickdial.bank.transit.factory.UssdMappingContextRegistrationFactory;

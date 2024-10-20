@@ -1,22 +1,25 @@
 package com.quantumforge.quickdial.messaging.template.strut;
 
 import com.quantumforge.quickdial.common.StringValues;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.io.File;
+import java.io.InputStream;
 
 @Data
 @Builder
+@ToString
 @NoArgsConstructor
 @AllArgsConstructor
 public class FileResource {
-    private File file;
+
+    private String fileName;
+    private String resourceFilePath;
+    private InputStream inputStream;
     private String qualifiedName;
+
     public String getFileExtension(){
-        int lastIndexOfDot = file.getName().lastIndexOf(StringValues.DOT);
-        return file.getName().substring(lastIndexOfDot + 1);
+        int lastIndexOfDot = fileName.lastIndexOf(StringValues.DOT);
+        return fileName.substring(lastIndexOfDot + 1);
     }
 }

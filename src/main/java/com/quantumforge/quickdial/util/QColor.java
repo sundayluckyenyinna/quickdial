@@ -1,4 +1,4 @@
-package com.quantumforge.quickdial;
+package com.quantumforge.quickdial.util;
 
 
 import lombok.Getter;

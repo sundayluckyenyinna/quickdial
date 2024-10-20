@@ -1,6 +1,6 @@
 package com.quantumforge.quickdial.logger;
 
-import com.quantumforge.quickdial.QColor;
+import com.quantumforge.quickdial.util.QColor;
 import com.quantumforge.quickdial.util.GeneralUtils;
 import lombok.extern.slf4j.Slf4j;
 

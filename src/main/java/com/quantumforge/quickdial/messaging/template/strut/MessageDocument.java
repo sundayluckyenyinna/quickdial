@@ -3,14 +3,16 @@ package com.quantumforge.quickdial.messaging.template.strut;
 import lombok.Data;
 
 import java.io.File;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
 @Data
 public class MessageDocument {
 
-    private File file;
     private String fileName;
+    private String resourceFilePath;
+    private InputStream inputStream;
     private String qualifiedName;
     private List<Message> messages;
 
@@ -29,8 +31,9 @@ public class MessageDocument {
     }
 
     public MessageDocument(FileResource fileResource){
-        this.fileName = fileResource.getFile().getName();
-        this.file = fileResource.getFile();
+        this.fileName = fileResource.getFileName();
+        this.resourceFilePath = fileResource.getResourceFilePath();
+        this.inputStream = fileResource.getInputStream();
         this.qualifiedName = fileResource.getQualifiedName();
         this.messages = new ArrayList<>();
     }

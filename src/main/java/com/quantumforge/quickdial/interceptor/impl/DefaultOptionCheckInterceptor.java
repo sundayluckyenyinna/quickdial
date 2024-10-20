@@ -29,8 +29,7 @@ public class DefaultOptionCheckInterceptor implements UssdInputValidationInterce
 
     private final UssdRedirectConfigProperties redirectConfigProperties;
     private final CommonUssdConfigProperties ussdConfigProperties;
-
-    private final static String REDIRECT_COUNT = "WRONG_INPUT_REDIRECT_COUNT";
+    private final static String WRONG_INPUT_REDIRECT_COUNT = "WRONG_INPUT_REDIRECT_COUNT";
 
 
     @Override
@@ -64,7 +63,7 @@ public class DefaultOptionCheckInterceptor implements UssdInputValidationInterce
                     }
                 }else { // Reset the trial to 0 since user has now entered correct input
                     updateShowErrorMessageCommand(userUssdModel, false, maximumRetryTimes);
-                    ussdSession.getSessionData().keepAttribute(REDIRECT_COUNT, 0);
+                    ussdSession.getSessionData().keepAttribute(WRONG_INPUT_REDIRECT_COUNT, 0);
                 }
             }else{
                 updateShowErrorMessageCommand(userUssdModel, false, maximumRetryTimes);
@@ -74,6 +73,11 @@ public class DefaultOptionCheckInterceptor implements UssdInputValidationInterce
             updateShowErrorMessageCommand(userUssdModel, false, maximumRetryTimes);
         }
         return result;
+    }
+
+    @Override
+    public int order() {
+        return 1;
     }
 
     private void setFocusForRedirection(UssdSession session){
@@ -119,20 +123,15 @@ public class DefaultOptionCheckInterceptor implements UssdInputValidationInterce
 
     private int getTrialTimes(UssdSession ussdSession){
         int trials;
-        Object redirectCount = ussdSession.getSessionData().getAttribute(REDIRECT_COUNT);
+        Object redirectCount = ussdSession.getSessionData().getAttribute(WRONG_INPUT_REDIRECT_COUNT);
         if(Objects.nonNull(redirectCount)){
             int redirectCountInt = Integer.parseInt(String.valueOf(redirectCount));
             trials = redirectCountInt + 1;
-            ussdSession.getSessionData().keepAttribute(REDIRECT_COUNT, trials);
+            ussdSession.getSessionData().keepAttribute(WRONG_INPUT_REDIRECT_COUNT, trials);
         }else{
             trials = 1;
-            ussdSession.getSessionData().keepAttribute(REDIRECT_COUNT, trials);
+            ussdSession.getSessionData().keepAttribute(WRONG_INPUT_REDIRECT_COUNT, trials);
         }
         return trials;
-    }
-
-    @Override
-    public int order() {
-        return 1;
     }
 }

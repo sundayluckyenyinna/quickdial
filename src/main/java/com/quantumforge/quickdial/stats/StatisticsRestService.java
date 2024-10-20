@@ -40,12 +40,11 @@ public class StatisticsRestService implements IStatisticsRestService{
         MessageDocuments messageDocuments = (MessageDocuments) applicationStore.getItem(ApplicationItem.MESSAGE_DOCUMENTS.name());
         List<UssdMessageDocumentModel> messageDocumentList = messageDocuments.getMessageDocuments()
                 .stream()
-                .map(messageDocument -> {
-                    UssdMessageDocumentModel model = new UssdMessageDocumentModel();
-                    BeanUtils.copyProperties(messageDocument, model);
-                    model.setFile(messageDocument.getFile().getAbsolutePath());
-                    return model;
-                }).collect(Collectors.toList());
+                .map(messageDocument -> UssdMessageDocumentModel.builder()
+                        .file(messageDocument.getResourceFilePath())
+                        .qualifiedName(messageDocument.getQualifiedName())
+                        .messages(messageDocument.getMessages())
+                        .build()).collect(Collectors.toList());
         result.put(DATA_KEY, messageDocumentList);
         return result;
     }

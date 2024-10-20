@@ -32,8 +32,8 @@ import static com.quantumforge.quickdial.messaging.config.QuickDialMessageSource
 @EnableConfigurationProperties(value = {UssdRedirectConfigProperties.class})
 public class XmlUssdMessageSourceDocumentBuilder implements MessageSourceDocumentBuilder {
 
-    private final QuickDialMessageTemplateEngineConfigProperties templateEngineConfigProperties;
     private final UssdRedirectConfigProperties redirectConfigProperties;
+    private final QuickDialMessageTemplateEngineConfigProperties templateEngineConfigProperties;
 
     @Override
     public boolean supportsDocumentType(DocumentType documentType) {
@@ -44,7 +44,7 @@ public class XmlUssdMessageSourceDocumentBuilder implements MessageSourceDocumen
     @SneakyThrows
     public MessageDocument buildDocument(FileResource fileResource){
         MessageDocument messageDocument = new MessageDocument(fileResource);
-        Document document = Jsoup.parse(fileResource.getFile(), StandardCharsets.UTF_8.name(), StringValues.EMPTY_STRING, Parser.xmlParser());
+        Document document = Jsoup.parse(fileResource.getInputStream(), StandardCharsets.UTF_8.name(), StringValues.EMPTY_STRING, Parser.xmlParser());
         Elements messageElements = document.getElementsByTag(XML_MESSAGE_TAG);
         for (Element messageElement : messageElements){
             String id = GeneralUtils.returnValueOrDefaultWith(messageElement.attr(XML_MESSAGE_ID), UUID.randomUUID().toString());

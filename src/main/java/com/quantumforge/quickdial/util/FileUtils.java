@@ -5,7 +5,7 @@ import com.quantumforge.quickdial.messaging.template.strut.FileResource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.StringUtils;
 
-import java.io.File;
+import java.io.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -42,10 +42,18 @@ public class FileUtils {
     public static List<FileResource> getFileResourcesInBaseFolder(File folder, String nestedFileSeparator){
         return getFilesInFolder(folder)
                 .stream()
-                .map(file -> FileResource.builder()
-                        .file(file)
-                        .qualifiedName(getQualifiedNameOfFileRelativeToFolder(file, folder.getAbsolutePath(), nestedFileSeparator))
-                        .build())
+                .map(file -> {
+                    try {
+                        return FileResource.builder()
+                                .fileName(file.getName())
+                                .resourceFilePath(file.getAbsolutePath())
+                                .inputStream(new FileInputStream(file))
+                                .qualifiedName(getQualifiedNameOfFileRelativeToFolder(file, folder.getAbsolutePath(), nestedFileSeparator))
+                                .build();
+                    } catch (FileNotFoundException e) {
+                        throw new RuntimeException(e);
+                    }
+                })
                 .collect(Collectors.toList());
     }
 
@@ -61,6 +69,14 @@ public class FileUtils {
         }catch (Exception exception){
             log.error(exception.getMessage());
             return StringValues.EMPTY_STRING;
+        }
+    }
+
+    public static void copyInputStreamToFile(InputStream inputStream, File file){
+        try (OutputStream output = new FileOutputStream(file)) {
+            inputStream.transferTo(output);
+        } catch (IOException exception) {
+            exception.printStackTrace();
         }
     }
 }

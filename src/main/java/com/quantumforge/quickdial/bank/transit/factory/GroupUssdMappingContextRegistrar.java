@@ -6,14 +6,12 @@ import com.quantumforge.quickdial.context.UssdExecutable;
 import com.quantumforge.quickdial.context.UssdExecutableType;
 import com.quantumforge.quickdial.context.UssdExecutionContext;
 import com.quantumforge.quickdial.exception.AmbiguousUssdMappingException;
-import com.quantumforge.quickdial.exception.IllegalGroupUssdMappingRegistrationException;
 import com.quantumforge.quickdial.util.GeneralUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Configuration;
 
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
@@ -57,6 +55,10 @@ public class GroupUssdMappingContextRegistrar implements UssdMappingContextRegis
         executionContexts.sort(Comparator.comparingInt(executionContext -> executionContext.getGroupMapping().order()));
         contextWrapper.setUssdExecutionContexts(executionContexts);
     }
+    @Override
+    public boolean supports(UssdExecutableType executableType) {
+        return executableType == UssdExecutableType.GROUP_EXECUTABLE;
+    }
 
     private void displayIllegalGroupMappingRegistration(String groupCommonMapping, UssdExecutionContext incomingMapping){
         String message = "FAILED TO START";
@@ -70,10 +72,5 @@ public class GroupUssdMappingContextRegistrar implements UssdMappingContextRegis
         System.out.println(GeneralUtils.writeWithLeftPadding(MESSAGE_PADDING, cause));
         System.out.println(GeneralUtils.writeWithLeftPadding(MESSAGE_PADDING, action));
         System.out.println(GeneralUtils.writeWithLeftPadding(MESSAGE_PADDING,"************************************************************"));
-    }
-
-    @Override
-    public boolean supports(UssdExecutableType executableType) {
-        return executableType == UssdExecutableType.GROUP_EXECUTABLE;
     }
 }
