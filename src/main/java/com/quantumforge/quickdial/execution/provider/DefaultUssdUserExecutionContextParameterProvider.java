@@ -58,7 +58,6 @@ public class DefaultUssdUserExecutionContextParameterProvider implements UssdUse
         UssdUserExecutionContext finalExecutableContext;
 
         fullCode = buildFullUssdCodeByInvocationType(payload.getOriginatingCode(), ussdConfigProperties.getBaseUssdCode(), payload.getPrefix(), payload.getInvocationType());
-        System.out.println("Full code: =====================>" + fullCode);
         contextData = buildContextDataForStartSession(getContextDataBuildParameter(payload, null));
         UssdExecutionContext context = ussdMappingRegistry.getMatchingUssdExecutionContextForMapping(fullCode);
 
