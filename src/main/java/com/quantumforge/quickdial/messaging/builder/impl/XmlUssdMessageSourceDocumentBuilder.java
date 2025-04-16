@@ -22,6 +22,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Configuration;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Objects;
 import java.util.UUID;
 
 import static com.quantumforge.quickdial.messaging.config.QuickDialMessageSourceConfigDefaultProperties.*;
@@ -72,15 +73,17 @@ public class XmlUssdMessageSourceDocumentBuilder implements MessageSourceDocumen
             Document documentContainingOnlyErrorLine = Jsoup.parse(getAutomaticErrorLineTemplate(), Parser.xmlParser());
             Document rawMessageDocument = Jsoup.parse(message.getRawTaggedMessage(), Parser.xmlParser());
             Element rawMessageElement = rawMessageDocument.child(0);
-            Element errorLineElement = documentContainingOnlyErrorLine.getElementsByTag(XML_LINE_TAG).first();
-            assert errorLineElement != null;
-            rawMessageElement.prependChild(errorLineElement);
-
-            MessageLine errorMessageLine = new MessageLine();
-            String errorContent = errorLineElement.text();
-            errorMessageLine.getAttributes().put(XML_MESSAGE_OPTION, StringValues.EMPTY_STRING);
-            errorMessageLine.setText(errorContent);
-            message.getLines().add(0, errorMessageLine);
+            Elements errorLineElementParent = documentContainingOnlyErrorLine.getElementsByTag(XML_LINE_TAG);
+            for(Element errorLineElement : errorLineElementParent) {
+                if(Objects.nonNull(errorLineElement)) {
+                    rawMessageElement.prependChild(errorLineElement);
+                    MessageLine errorMessageLine = new MessageLine();
+                    String errorContent = errorLineElement.text();
+                    errorMessageLine.getAttributes().put(XML_MESSAGE_OPTION, StringValues.EMPTY_STRING);
+                    errorMessageLine.setText(errorContent);
+                    message.getLines().add(0, errorMessageLine);
+                }
+            }
             String rawMessageTag = cleanRawMessage(rawMessageElement.toString());
             message.setRawTaggedMessage(rawMessageTag);
         }
@@ -88,15 +91,27 @@ public class XmlUssdMessageSourceDocumentBuilder implements MessageSourceDocumen
 
     private String getAutomaticErrorLineTemplate(){
         String template;
+        String inputValidationRedirectionMessage;
         ModelTemplateEngine engine = getPreferredTemplateEngine();
         switch (engine){
-            case THYMELEAF: { template = THYMELEAF_AUTOMATIC_ERROR_LINE_TEMPLATE; break; }
-            case FREEMARKER: { template = FREEMARKER_AUTOMATIC_ERROR_LINE_TEMPLATE; break; }
-            default: template = THYMELEAF_AUTOMATIC_ERROR_LINE_TEMPLATE;
+            case THYMELEAF: {
+                template = THYMELEAF_AUTOMATIC_ERROR_LINE_TEMPLATE;
+                inputValidationRedirectionMessage = THYMELEAF_INPUT_VALIDATION_ERROR_TEMPLATE;
+                break;
+            }
+            case FREEMARKER: {
+                template = FREEMARKER_AUTOMATIC_ERROR_LINE_TEMPLATE;
+                inputValidationRedirectionMessage = FREEMARKER_INPUT_VALIDATION_ERROR_TEMPLATE;
+                break;
+            }
+            default: {
+                template = THYMELEAF_AUTOMATIC_ERROR_LINE_TEMPLATE;
+                inputValidationRedirectionMessage = THYMELEAF_INPUT_VALIDATION_ERROR_TEMPLATE;
+            }
         }
         String redirectMessage = redirectConfigProperties.getDefaultInputValidationMessage();
         redirectMessage = formatRedirectionMessageTagByEngine(redirectMessage, engine);
-        String templateWithMessage = String.format(template, redirectMessage);
+        String templateWithMessage = String.format(template, inputValidationRedirectionMessage, redirectMessage);
         return Parser.unescapeEntities(templateWithMessage, false);
     }
 

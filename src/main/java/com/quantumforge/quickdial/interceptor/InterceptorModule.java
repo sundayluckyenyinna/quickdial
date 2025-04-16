@@ -8,8 +8,11 @@ import org.springframework.context.annotation.Import;
 @Configuration
 @AutoConfiguration
 @Import(value = {
-      DefaultOptionCheckInterceptor.class, DefaultUssdInputInterceptorExecution.class,
-      DefaultUssdRegistrationInterceptor.class, UssdGoBackSpecialInputInterceptor.class,
+        DefaultOptionCheckInterceptor.class,
+        DefaultUssdInputInterceptorExecution.class,
+        DefaultUssdParamPatternCheckInterceptor.class,
+        DefaultUssdRegistrationInterceptor.class,
+        UssdGoBackSpecialInputInterceptor.class,
         UssdGoForwardSpecialInputInterceptor.class
 })
 public class InterceptorModule {

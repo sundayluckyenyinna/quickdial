@@ -76,7 +76,7 @@ public class UssdGoForwardSpecialInputInterceptor implements UssdSpecialInputInt
                     Objects.nonNull(currentContext.getExecutionContext().getGroupMapping()) &&
                     currentContext.getExecutionContext().getGroupMapping().relaxForwardNavigation()){
 
-                String fullUssdCode = quickDialUtil.extendUssdCode(currentContext.getUssdCode(), incomingExecutionContext.getInput());
+                String fullUssdCode = quickDialUtil.extendUssdCode(currentContext.getUssdCode(), incomingExecutionContext.getInvocationType(), incomingExecutionContext.getPrefix(), incomingExecutionContext.getInput());
                 String contextData = quickDialUtil.applicationChain(currentContext.getContextData(), incomingExecutionContext.getInput());
 
                 UssdExecutionContext executionContext = ussdMappingRegistry.getMatchingUssdExecutionContextForMapping(fullUssdCode);

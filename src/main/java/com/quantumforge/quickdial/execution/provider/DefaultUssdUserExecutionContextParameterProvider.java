@@ -1,5 +1,6 @@
 package com.quantumforge.quickdial.execution.provider;
 
+import com.quantumforge.quickdial.annotation.UssdParam;
 import com.quantumforge.quickdial.bank.transit.UssdMappingRegistry;
 import com.quantumforge.quickdial.bootstrap.CommonUssdConfigProperties;
 import com.quantumforge.quickdial.context.UssdExecutionContext;
@@ -9,11 +10,14 @@ import com.quantumforge.quickdial.event.UssdEventPublisher;
 import com.quantumforge.quickdial.interceptor.*;
 import com.quantumforge.quickdial.payload.QuickDialPayload;
 import com.quantumforge.quickdial.session.UssdSession;
+import com.quantumforge.quickdial.util.GeneralUtils;
 import com.quantumforge.quickdial.util.QuickDialUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Configuration;
 
+import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
 import java.util.Arrays;
 import java.util.Objects;
 
@@ -53,7 +57,8 @@ public class DefaultUssdUserExecutionContextParameterProvider implements UssdUse
         String fullCode, contextData;
         UssdUserExecutionContext finalExecutableContext;
 
-        fullCode = buildFullUssdCodeByInvocationType(payload.getOriginatingCode(), ussdConfigProperties.getBaseUssdCode(), payload.getInvocationType());
+        fullCode = buildFullUssdCodeByInvocationType(payload.getOriginatingCode(), ussdConfigProperties.getBaseUssdCode(), payload.getPrefix(), payload.getInvocationType());
+        System.out.println("Full code: =====================>" + fullCode);
         contextData = buildContextDataForStartSession(getContextDataBuildParameter(payload, null));
         UssdExecutionContext context = ussdMappingRegistry.getMatchingUssdExecutionContextForMapping(fullCode);
 
@@ -67,6 +72,7 @@ public class DefaultUssdUserExecutionContextParameterProvider implements UssdUse
         UssdEventPublisher.publishSessionInitEvent(session, sessionInitData);
         finalExecutableContext = incomingContext;
         session.updateUserUssdNavigationContext(finalExecutableContext);
+        printIncomingContextHandler(fullCode, finalExecutableContext);
         return finalExecutableContext;
     }
 
@@ -75,7 +81,7 @@ public class DefaultUssdUserExecutionContextParameterProvider implements UssdUse
         UssdUserExecutionContext finalExecutableContext = null;
         UssdSession session = registrationInterceptor.registerOrRetrieveSession(payload.getSessionId());
 
-        // Intercept and check for the validity of the input
+        // Intercept and check for the validity of the input based on valid options
         UssdUserExecutionContextInterceptionResult inputValidationInterception = inputInterceptorExecution.checkValidInputInterception(payload.getInput(), session);
         if(inputValidationInterception.isIntercepted()){
             finalExecutableContext = inputValidationInterception.getResultingContext();
@@ -86,7 +92,7 @@ public class DefaultUssdUserExecutionContextParameterProvider implements UssdUse
         if(isSpecialInput(payload.getInput())){
             fullCode = currentContext.getUssdCode();
         }else {
-            fullCode = quickDialUtil.extendUssdCode(currentContext.getUssdCode(), payload.getInput());
+            fullCode = quickDialUtil.extendUssdCode(currentContext.getUssdCode(), payload.getInvocationType(), payload.getPrefix(), payload.getInput());
         }
 
         String newContextData = buildContextDataForContinuedSession(getContextDataBuildParameter(payload, currentContext.getContextData()));
@@ -108,6 +114,13 @@ public class DefaultUssdUserExecutionContextParameterProvider implements UssdUse
 
         SessionInitData sessionInitData = buildSessionInitData(payload, finalExecutableContext.getContextData());
         UssdEventPublisher.publishSessionUpdatedEvent(session, sessionInitData);
+        printIncomingContextHandler(fullCode, finalExecutableContext);
+
+        // Check for valid input interception based on pattern
+        UssdUserExecutionContextInterceptionResult inputParamValidationInterception = inputInterceptorExecution.checkValidInputParamInterception(payload.getInput(), session);
+        if(inputParamValidationInterception.isIntercepted()){
+            finalExecutableContext = inputParamValidationInterception.getResultingContext();
+        }
         return finalExecutableContext;
     }
 
@@ -134,6 +147,7 @@ public class DefaultUssdUserExecutionContextParameterProvider implements UssdUse
 
     private ContextDataBuildParam getContextDataBuildParameter(QuickDialPayload payload, String oldContextData){
         return ContextDataBuildParam.builder()
+                .prefix(payload.getPrefix())
                 .msisdn(payload.getMsisdn())
                 .telco(payload.getTelco())
                 .baseCode(ussdConfigProperties.getBaseUssdCode())
@@ -145,5 +159,15 @@ public class DefaultUssdUserExecutionContextParameterProvider implements UssdUse
 
     private boolean isSpecialInput(String input){
         return Arrays.asList(ussdConfigProperties.getGoBackOption(), ussdConfigProperties.getGoForwardOption()).contains(input);
+    }
+
+    private void printIncomingContextHandler(String fullCode, UssdUserExecutionContext executionContext){
+        System.out.println();
+        log.info("------------------------------------------------ USSD Incoming request ------------------------------------------------");
+        log.info("Full code: {}", fullCode);
+        log.info("Class processor: {}", executionContext.getExecutionContext().getCallableClass().getSimpleName());
+        log.info("Method processor: {}", executionContext.getExecutionContext().getInvocableMethod().getName());
+        log.info("-----------------------------------------------------------------------------------------------------------------------");
+        System.out.println();
     }
 }

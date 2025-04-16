@@ -17,7 +17,7 @@ import java.util.Map;
 public class UssdSessionModel {
     private String sessionId;
     private BackwardNavigableList<UssdUserExecutionContextModel> executionContextChain = new BackwardNavigableList<>();
-    private Map<String, Object> sessionData = new LinkedHashMap<>();
+    private Map<Object, Object> sessionData = new LinkedHashMap<>();
     private Map<String, Object> ussdModel = new LinkedHashMap<>();
     private String createdAt;
     private boolean isFresh;

@@ -6,4 +6,6 @@ import com.quantumforge.quickdial.session.UssdSession;
 public interface UssdInputInterceptorExecution {
     UssdUserExecutionContextInterceptionResult checkSpecialInputInterception(UssdUserExecutionContext incomingContext, UssdSession session);
     UssdUserExecutionContextInterceptionResult checkValidInputInterception(String incomingInput, UssdSession session);
+
+    UssdUserExecutionContextInterceptionResult checkValidInputParamInterception(String incomingInput, UssdSession session);
 }

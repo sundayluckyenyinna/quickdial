@@ -2,6 +2,7 @@ package com.quantumforge.quickdial.execution.provider;
 
 import com.quantumforge.quickdial.common.StringValues;
 import com.quantumforge.quickdial.payload.QuickDialPayload;
+import com.quantumforge.quickdial.util.GeneralUtils;
 import com.quantumforge.quickdial.util.QuickDialUtil;
 
 import java.util.List;
@@ -21,7 +22,13 @@ public interface UssdUserExecutionContextParameterProvider{
                 .filter(string -> Objects.nonNull(string) && !string.trim().isEmpty())
                 .filter(string -> !string.equalsIgnoreCase(param.getBaseCode()))
                 .collect(Collectors.toList());
-        String chainedUssdData = QuickDialUtil.staticApplicationChain(param.getMsisdn(), param.getTelco().toUpperCase());
+
+        String chainedUssdData;
+        if(GeneralUtils.isNullOrEmpty(param.getPrefix())) {
+            chainedUssdData = QuickDialUtil.staticApplicationChain(param.getMsisdn(), param.getTelco().toUpperCase());
+        }else {
+            chainedUssdData = QuickDialUtil.staticApplicationChain(param.getMsisdn(), param.getTelco().toUpperCase(), param.getPrefix());
+        }
 
         if(!tokensWithoutBaseCode.isEmpty()) {
             String chainedTokens = QuickDialUtil.staticApplicationChain(tokensWithoutBaseCode);
@@ -31,20 +38,43 @@ public interface UssdUserExecutionContextParameterProvider{
     }
 
     default String buildContextDataForContinuedSession(ContextDataBuildParam param){
-        if(Objects.nonNull(param.getIncomingInput())){
-            return QuickDialUtil.staticApplicationChain(param.getOldContextData(), param.getIncomingInput());
+        String reconstructedOldContextData;
+        if(!GeneralUtils.isNullOrEmpty(param.getPrefix())){
+            List<String> oldContextDataTokens = QuickDialUtil.tokenizeContextData(param.getOldContextData());
+            if(oldContextDataTokens.size() >= 3){
+                oldContextDataTokens.set(2, param.getPrefix().trim());
+            }else {
+                oldContextDataTokens.add(2, param.getPrefix().trim());
+            }
+            reconstructedOldContextData = QuickDialUtil.staticApplicationChain(oldContextDataTokens);
+        }else{
+            reconstructedOldContextData = param.getOldContextData();
         }
-        return param.getOldContextData();
+        if(Objects.nonNull(param.getIncomingInput())){
+            return QuickDialUtil.staticApplicationChain(reconstructedOldContextData, param.getIncomingInput());
+        }
+        return reconstructedOldContextData;
     }
 
-    default String buildFullUssdCodeByInvocationType(String code, String baseCode, UssdInvocationType invocationType){
+    default String buildFullUssdCodeByInvocationType(String code, String baseCode, String prefix, UssdInvocationType invocationType){
         String fullCode;
         if(invocationType == UssdInvocationType.PROGRESSIVE){
-            fullCode = code;
+            if(!GeneralUtils.isNullOrEmpty(prefix)) {
+                fullCode = code.substring(0, code.lastIndexOf(QuickDialUtil.sProperties.getEndDelimiter()));
+                fullCode = fullCode.concat(QuickDialUtil.sProperties.getStartDelimiter() + prefix).concat(QuickDialUtil.sProperties.getEndDelimiter());
+            }else{
+                fullCode = code;
+            }
+            fullCode = fullCode.replace(StringValues.BACKWARD_SLASH, StringValues.EMPTY_STRING);
         }
         else if(invocationType == UssdInvocationType.SHORT_CODE){
             String baseCodeWithoutHash = baseCode.substring(0, baseCode.indexOf(QuickDialUtil.sProperties.getEndDelimiter()));
-            String replacement = QuickDialUtil.staticApplicationChain(baseCodeWithoutHash, QuickDialUtil.sProperties.getShortCodePrefix());
+            String replacement;
+            if(!GeneralUtils.isNullOrEmpty(prefix)) {
+                 replacement = QuickDialUtil.staticApplicationChain(baseCodeWithoutHash, QuickDialUtil.sProperties.getShortCodePrefix(), prefix);
+            }else{
+                replacement = QuickDialUtil.staticApplicationChain(baseCodeWithoutHash, QuickDialUtil.sProperties.getShortCodePrefix());
+            }
             fullCode = code.replace(baseCodeWithoutHash, replacement);
         }else{
             throw new IllegalArgumentException("Invalid invocation type");

@@ -11,6 +11,7 @@ import com.quantumforge.quickdial.event.UssdEventPublisher;
 import com.quantumforge.quickdial.exception.TemplateParsingException;
 import com.quantumforge.quickdial.exception.UssdMessageNotFoundException;
 import com.quantumforge.quickdial.interceptor.UssdInputValidationInterceptor;
+import com.quantumforge.quickdial.messaging.builder.MessageSourceDocumentBuilder;
 import com.quantumforge.quickdial.messaging.starter.QuickDialMessageSourceStarter;
 import com.quantumforge.quickdial.messaging.template.instrumentation.OptionLineWriter;
 import com.quantumforge.quickdial.messaging.template.resolvers.TemplateResolverRouter;

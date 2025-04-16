@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class ContextDataBuildParam {
 
+    private String prefix;
     private String msisdn;
     private String telco;
     private String baseCode;

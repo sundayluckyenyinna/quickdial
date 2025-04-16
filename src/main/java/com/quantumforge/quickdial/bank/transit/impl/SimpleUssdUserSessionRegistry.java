@@ -1,5 +1,6 @@
 package com.quantumforge.quickdial.bank.transit.impl;
 
+import com.quantumforge.quickdial.bank.global.ApplicationStore;
 import com.quantumforge.quickdial.bank.transit.UssdUserSessionRegistry;
 import com.quantumforge.quickdial.event.UssdEventPublisher;
 import com.quantumforge.quickdial.session.UssdSession;
@@ -18,6 +19,8 @@ import java.util.concurrent.ConcurrentMap;
 @Configuration
 @RequiredArgsConstructor
 public class SimpleUssdUserSessionRegistry implements UssdUserSessionRegistry {
+
+    private final ApplicationStore applicationStore;
     private static final ConcurrentMap<String, UssdSession> SESSION_REGISTRY_LOG = new ConcurrentHashMap<>();
 
     @Override
@@ -53,6 +56,7 @@ public class SimpleUssdUserSessionRegistry implements UssdUserSessionRegistry {
         if(!Objects.isNull(sessionToBeInvalidated)){
             UssdEventPublisher.publishSessionPreDestroyedEvent(sessionToBeInvalidated);
             UssdSession removedSession = SESSION_REGISTRY_LOG.remove(sessionId);
+            applicationStore.removeItem(sessionId);
             UssdEventPublisher.publishSessionPostDestroyedEvent(removedSession);
         }
     }

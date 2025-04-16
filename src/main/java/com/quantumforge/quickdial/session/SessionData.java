@@ -16,39 +16,39 @@ public final class SessionData {
         return this.session;
     }
 
-    private final ConcurrentMap<String, Object> SESSION_DATA_REPO = new ConcurrentHashMap<>();
+    private final ConcurrentMap<Object, Object> SESSION_DATA_REPO = new ConcurrentHashMap<>();
 
-    public void keepAttribute(String key, Object attr){
+    public void keepAttribute(Object key, Object attr){
         addOrThrowException(key, attr);
     }
 
-    public Object getAttribute(String key){
+    public Object getAttribute(Object key){
         return SESSION_DATA_REPO.get(key);
     }
 
-    public <T> T getAttribute(String key, Class<T> tClass){
+    public <T> T getAttribute(Object key, Class<T> tClass){
         Object attribute = SESSION_DATA_REPO.get(key);
         return Objects.nonNull(attribute) ? getCast(attribute, tClass) : null;
     }
 
-    public void removeAttribute(String key){
+    public void removeAttribute(Object key){
         SESSION_DATA_REPO.remove(key);
     }
 
-    public Object removeAndGetAttr(String key){
+    public Object removeAndGetAttr(Object key){
         return SESSION_DATA_REPO.remove(key);
     }
 
-    public <T> T removeAndGetAttrOfType(String key, Class<T> tClass){
+    public <T> T removeAndGetAttrOfType(Object key, Class<T> tClass){
         Object removed = removeAndGetAttr(key);
         return getCast(removed, tClass);
     }
 
-    public Object  replaceAttr(String key, Object attr){
+    public Object  replaceAttr(Object key, Object attr){
         return SESSION_DATA_REPO.replace(key, attr);
     }
 
-    public Map<String, Object> getSessionRepo(){
+    public Map<Object, Object> getSessionRepo(){
         return SESSION_DATA_REPO;
     }
 
@@ -59,7 +59,7 @@ public final class SessionData {
         throw new ClassCastException(String.format("Session attribute of type: %s cannot be assignable from supplied type: %s", attribute.getClass(), tClass));
     }
 
-    private void addOrThrowException(String key, Object attr){
+    private void addOrThrowException(Object key, Object attr){
         if(Objects.nonNull(key) && Objects.nonNull(attr)){
             SESSION_DATA_REPO.put(key, attr);
             return;

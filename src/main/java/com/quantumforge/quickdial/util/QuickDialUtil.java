@@ -3,16 +3,14 @@ package com.quantumforge.quickdial.util;
 import com.quantumforge.quickdial.bank.transit.UssdMapType;
 import com.quantumforge.quickdial.bootstrap.CommonUssdConfigProperties;
 import com.quantumforge.quickdial.common.StringValues;
+import com.quantumforge.quickdial.execution.provider.UssdInvocationType;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -120,9 +118,40 @@ public class QuickDialUtil {
         return offset.trim();
     }
 
-    public String extendUssdCode(String incomingCode, String input){
+    public String extendUssdCode(String incomingCode, UssdInvocationType invocationType, String prefix, String input){
+        String fullCode;
         String incomingCodeWithoutHash = incomingCode.replace(properties.getEndDelimiter(), StringValues.EMPTY_STRING).trim();
-        return incomingCodeWithoutHash.concat(properties.getStartDelimiter()).concat(input).concat(properties.getEndDelimiter())
+        if(!GeneralUtils.isNullOrEmpty(prefix) && !incomingCode.contains(prefix)) {
+            fullCode = incomingCodeWithoutHash
+                    .concat(invocationType == UssdInvocationType.SHORT_CODE ? sProperties.getStartDelimiter() + sProperties.getShortCodePrefix() : StringValues.EMPTY_STRING)
+                    .concat(properties.getStartDelimiter())
+                    .concat(prefix)
+                    .concat(properties.getStartDelimiter())
+                    .concat(input)
+                    .concat(properties.getEndDelimiter())
+                    .replace(StringValues.BACKWARD_SLASH, StringValues.EMPTY_STRING);
+        }else{
+            fullCode = incomingCodeWithoutHash.concat(properties.getStartDelimiter()).concat(input).concat(properties.getEndDelimiter())
+                    .replace(StringValues.BACKWARD_SLASH, StringValues.EMPTY_STRING);
+        }
+        return fullCode;
+    }
+
+    public static List<String> tokenizeContextData(String contextData){
+        String[] tokenArray = contextData.split(sProperties.getStartDelimiter());
+        return new ArrayList<>(List.of(tokenArray));
+    }
+
+    public static String buildWithSimulationPrefixAndInputs(String prefix, String ... inputs){
+        String baseCodeWithoutHash = sConfigProperties.getBaseUssdCodeWithoutEndDelimiter();
+        if(!GeneralUtils.isNullOrEmpty(prefix)){
+            baseCodeWithoutHash = baseCodeWithoutHash.concat(sProperties.getStartDelimiter()).concat(prefix);
+        }
+        String chainedInputs = QuickDialUtil.staticApplicationChain(inputs);
+        return baseCodeWithoutHash
+                .concat(sProperties.getStartDelimiter())
+                .concat(chainedInputs)
+                .concat(sProperties.getEndDelimiter())
                 .replace(StringValues.BACKWARD_SLASH, StringValues.EMPTY_STRING);
     }
 

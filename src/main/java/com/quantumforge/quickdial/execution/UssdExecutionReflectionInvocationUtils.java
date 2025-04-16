@@ -143,7 +143,7 @@ public class UssdExecutionReflectionInvocationUtils {
 
     private static void fillForSessionValueAnnotation(Parameter parameter, List<Parameter> parameters, Object[] values, SessionData sessionData){
         SessionValue sessionValue = parameter.getAnnotation(SessionValue.class);
-        Map<String, Object> map = sessionData.getSessionRepo();
+        Map<Object, Object> map = sessionData.getSessionRepo();
         if(Objects.nonNull(sessionValue)){
             String value = sessionValue.value();
             int paramIndex = parameters.indexOf(parameter);

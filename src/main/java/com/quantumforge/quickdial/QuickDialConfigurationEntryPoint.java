@@ -8,6 +8,7 @@ import com.quantumforge.quickdial.event.EventModule;
 import com.quantumforge.quickdial.execution.ExecutionModule;
 import com.quantumforge.quickdial.interceptor.InterceptorModule;
 import com.quantumforge.quickdial.messaging.MessagingModule;
+import com.quantumforge.quickdial.simulation.SimulationModule;
 import com.quantumforge.quickdial.stats.StatisticsModule;
 import com.quantumforge.quickdial.util.UtilModule;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
@@ -25,6 +26,7 @@ import org.springframework.context.annotation.Import;
         ExecutionModule.class,
         InterceptorModule.class,
         MessagingModule.class,
+        SimulationModule.class,
         StatisticsModule.class,
         UtilModule.class
 })

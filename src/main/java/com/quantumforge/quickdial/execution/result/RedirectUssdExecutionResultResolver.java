@@ -9,8 +9,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Configuration;
 
-import java.util.Objects;
-
 @Slf4j
 @Configuration
 @RequiredArgsConstructor
@@ -32,5 +30,4 @@ public class RedirectUssdExecutionResultResolver implements UssdExecutionResultR
     public boolean supportsState(UssdExecution.MenuReturnState returnState) {
         return returnState == UssdExecution.MenuReturnState.REDIRECT;
     }
-
 }

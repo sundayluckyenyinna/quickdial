@@ -9,6 +9,8 @@ public interface QuickDialMessageSourceConfigDefaultProperties {
     // XML CONFIGS
     String XML_MESSAGE_TAG = "message";
     String XML_LINE_TAG = "line";
+    String XML_FRAGMENT_TAGE = "fragment";
+
     String XML_MESSAGE_ID = "id";
     String XML_MESSAGE_OPTION = "option";
     String XML_LINE_TAG_RAW = "<line></line>";

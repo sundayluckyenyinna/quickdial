@@ -7,6 +7,7 @@ import java.lang.annotation.*;
 @Documented
 @Target(ElementType.PARAMETER)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface UssdParam {
-    String value() default StringValues.EMPTY_STRING;
+public @interface Valid {
+    String pattern() default StringValues.EMPTY_STRING;
+    String message() default "Invalid input";
 }
